@@ -59,6 +59,9 @@
     "priceUnit": "USD/month",
     "addedToFavorites": "Added to favorites!",
     "removedFromFavorites": "Removed from favorites.",
+    "goToImage": "Go to image",
+    "noImageAvailable": "No Image Available",
+    "unnamedProperty": "Unnamed Property",
     "checkOutProperty": "Check out this property",
     "shareError": "Could not share property.",
     "shareNotAvailable": "Share functionality is not available on your browser.",
@@ -77,12 +80,14 @@
     },
     "descriptionTitle": "Description",
     "contactLandlordTitle": "Contact Landlord",
+    "contactOptionsTitle": "Contact Options",
     "contact": {
       "email": "Email Landlord",
       "call": "Call Landlord",
       "notProvided": "Contact information not provided."
     },
     "shareButton": "Share Property",
-    "contactLandlordMobilePrompt": "Contact options are available above, or implement a modal here."
+    "contactLandlordMobilePrompt": "Contact options are available above. Scroll to view."
   }
 }
+

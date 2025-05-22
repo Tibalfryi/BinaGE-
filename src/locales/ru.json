@@ -59,6 +59,9 @@
     "priceUnit": "USD/мес.",
     "addedToFavorites": "Добавлено в избранное!",
     "removedFromFavorites": "Удалено из избранного.",
+    "goToImage": "Перейти к изображению",
+    "noImageAvailable": "Изображение отсутствует",
+    "unnamedProperty": "Объект без названия",
     "checkOutProperty": "Посмотрите этот объект",
     "shareError": "Не удалось поделиться объектом.",
     "shareNotAvailable": "Функция 'Поделиться' недоступна в вашем браузере.",
@@ -77,12 +80,14 @@
     },
     "descriptionTitle": "Описание",
     "contactLandlordTitle": "Связаться с владельцем",
+    "contactOptionsTitle": "Способы связи",
     "contact": {
       "email": "Написать владельцу",
       "call": "Позвонить владельцу",
       "notProvided": "Контактная информация не предоставлена."
     },
     "shareButton": "Поделиться объектом",
-    "contactLandlordMobilePrompt": "Варианты связи доступны выше или здесь можно реализовать модальное окно."
+    "contactLandlordMobilePrompt": "Способы связи доступны выше. Прокрутите для просмотра."
   }
 }
+

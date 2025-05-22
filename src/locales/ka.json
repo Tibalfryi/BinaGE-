@@ -59,6 +59,9 @@
     "priceUnit": "USD/თვეში",
     "addedToFavorites": "დამატებულია რჩეულებში!",
     "removedFromFavorites": "ამოღებულია რჩეულებიდან.",
+    "goToImage": "გადასვლა სურათზე",
+    "noImageAvailable": "სურათი არ არის ხელმისაწვდომი",
+    "unnamedProperty": "უსახელო ბინა",
     "checkOutProperty": "შეამოწმეთ ეს ბინა",
     "shareError": "ბინის გაზიარება ვერ მოხერხდა.",
     "shareNotAvailable": "გაზიარების ფუნქცია მიუწვდომელია თქვენს ბრაუზერში.",
@@ -77,12 +80,14 @@
     },
     "descriptionTitle": "აღწერა",
     "contactLandlordTitle": "დაუკავშირდით მფლობელს",
+    "contactOptionsTitle": "საკონტაქტო ვარიანტები",
     "contact": {
       "email": "მიწერეთ მფლობელს",
       "call": "დაურეკეთ მფლობელს",
       "notProvided": "საკონტაქტო ინფორმაცია მითითებული არ არის."
     },
     "shareButton": "ბინის გაზიარება",
-    "contactLandlordMobilePrompt": "კონტაქტის ვარიანტები ხელმისაწვდომია ზემოთ, ან აქ შეიძლება მოდალური ფანჯრის იმპლემენტაცია."
+    "contactLandlordMobilePrompt": "კონტაქტის ვარიანტები ხელმისაწვდომია ზემოთ. ჩასქროლეთ სანახავად."
   }
 }
+
