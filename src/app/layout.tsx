@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import { APIProvider } from '@vis.gl/react-google-maps';
-import { SidebarProvider } from '@/components/ui/sidebar'; // Import SidebarProvider
+import { ClientProviders } from '@/components/layout/client-providers'; // Import the new wrapper
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,11 +18,6 @@ export const metadata: Metadata = {
   description: 'Find your perfect apartment in Batumi with BinaGE Lite.',
 };
 
-// It's highly recommended to use an environment variable for the API key.
-// For this exercise, using the key directly as provided in the prompt.
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyB9w9vQF51hdCFEuQ5olMTaIs6EiJQJQi8';
-
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,12 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-          <SidebarProvider defaultOpen={true}>
-            {children}
-            <Toaster />
-          </SidebarProvider>
-        </APIProvider>
+        <ClientProviders> {/* Use the new wrapper */}
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );
