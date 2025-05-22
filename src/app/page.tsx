@@ -7,42 +7,53 @@ import { FilterSidebar } from '@/components/layout/filter-sidebar';
 import { GoogleMapView } from '@/components/map/google-map-view';
 import { PropertyListView } from '@/components/property/property-list-view';
 import { Button } from '@/components/ui/button';
-import { MapIcon, ListIcon, Loader2 } from 'lucide-react';
+import { MapIcon, ListIcon, Loader2, ArrowDownNarrowWide, ArrowUpNarrowWide, X } from 'lucide-react';
 import type { Property, PropertyFilters } from '@/types';
 import { mockProperties } from '@/data/mock-data';
 import { SidebarInset } from '@/components/ui/sidebar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 type ViewMode = 'map' | 'list';
+type SortOrder = 'none' | 'price_asc' | 'price_desc';
+
+const defaultFilters: PropertyFilters = {
+  priceMin: 0,
+  priceMax: 5000,
+  roomsMin: 0,
+  areaMin: 0,
+  areaMax: 300,
+  heating: [],
+  balcony: false,
+  dishwasher: false,
+  oven: false,
+  pets: false,
+  searchQuery: "",
+};
 
 export default function HomePage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [filters, setFilters] = useState<PropertyFilters>({
-    priceMin: 0,
-    priceMax: 5000,
-    roomsMin: 0,
-    areaMin: 0,
-    areaMax: 300,
-    heating: [],
-    balcony: false,
-    dishwasher: false,
-    oven: false,
-    pets: false,
-  });
+  const [filters, setFilters] = useState<PropertyFilters>(defaultFilters);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const [isLoading, setIsLoading] = useState(true);
 
   // Simulate fetching properties
   useEffect(() => {
-    setIsLoading(true);
     // In a real app, fetch properties from an API
     setProperties(mockProperties);
-    setFilteredProperties(mockProperties); // Initially show all
-    setIsLoading(false);
+    // Initial filtering and sorting will be handled by the main effect
   }, []);
 
-  const applyFilters = useCallback((allProps: Property[], currentFilters: PropertyFilters): Property[] => {
-    return allProps.filter(prop => {
+  const applyFiltersAndSorting = useCallback((allProps: Property[], currentFilters: PropertyFilters, currentSortOrder: SortOrder): Property[] => {
+    let processedProps = allProps.filter(prop => {
       if (currentFilters.priceMin !== undefined && prop.price < currentFilters.priceMin) return false;
       if (currentFilters.priceMax !== undefined && prop.price > currentFilters.priceMax) return false;
       if (currentFilters.roomsMin !== undefined && prop.rooms < currentFilters.roomsMin) return false;
@@ -55,23 +66,46 @@ export default function HomePage() {
       if (currentFilters.pets !== undefined && currentFilters.pets && !prop.pets) return false;
       if (currentFilters.searchQuery) {
         const query = currentFilters.searchQuery.toLowerCase();
-        if (!prop.address.toLowerCase().includes(query) && !(prop.name || '').toLowerCase().includes(query) && !prop.description.toLowerCase().includes(query)) {
+        const nameMatch = (prop.name || '').toLowerCase().includes(query);
+        const addressMatch = prop.address.toLowerCase().includes(query);
+        const descriptionMatch = prop.description.toLowerCase().includes(query);
+        if (!nameMatch && !addressMatch && !descriptionMatch) {
           return false;
         }
       }
       return true;
     });
+
+    if (currentSortOrder === 'price_asc') {
+      processedProps.sort((a, b) => a.price - b.price);
+    } else if (currentSortOrder === 'price_desc') {
+      processedProps.sort((a, b) => b.price - a.price);
+    }
+    // If 'none', no explicit sort, relies on original or previous sort if stable
+
+    return processedProps;
   }, []);
+
+  useEffect(() => {
+    setIsLoading(true);
+    // Simulate delay for processing
+    const timer = setTimeout(() => {
+      const newFilteredSortedProperties = applyFiltersAndSorting(properties, filters, sortOrder);
+      setFilteredProperties(newFilteredSortedProperties);
+      setIsLoading(false);
+    }, 300); // Short delay to simulate processing
+    return () => clearTimeout(timer);
+  }, [properties, filters, sortOrder, applyFiltersAndSorting]);
+
 
   const handleFiltersChange = useCallback((newFilters: PropertyFilters) => {
     setFilters(newFilters);
-    setIsLoading(true);
-    // Simulate delay for filter application
-    setTimeout(() => {
-      setFilteredProperties(applyFilters(properties, newFilters));
-      setIsLoading(false);
-    }, 300);
-  }, [properties, applyFilters]);
+    // The useEffect above will handle re-filtering and re-sorting
+  }, []);
+
+  const handleSortChange = (value: string) => {
+    setSortOrder(value as SortOrder);
+  }
 
 
   return (
@@ -81,23 +115,45 @@ export default function HomePage() {
         <FilterSidebar onFiltersChange={handleFiltersChange} initialFilters={filters} />
         <SidebarInset className="flex-1 flex flex-col overflow-hidden">
           <div className="p-4 border-b bg-card">
-            <div className="container mx-auto flex justify-end">
-              <Button
-                variant={viewMode === 'map' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('map')}
-                className="mr-2 gap-2"
-              >
-                <MapIcon className="h-4 w-4" /> Map View
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="gap-2"
-              >
-                <ListIcon className="h-4 w-4" /> List View
-              </Button>
+            <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="w-full sm:w-auto">
+                 <Select value={sortOrder} onValueChange={handleSortChange}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Sort by..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Sorting</SelectItem>
+                    <SelectItem value="price_asc">
+                      <div className="flex items-center gap-2">
+                        <ArrowUpNarrowWide className="h-4 w-4" /> Price: Low to High
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="price_desc">
+                       <div className="flex items-center gap-2">
+                        <ArrowDownNarrowWide className="h-4 w-4" /> Price: High to Low
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center">
+                <Button
+                  variant={viewMode === 'map' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('map')}
+                  className="mr-2 gap-2"
+                >
+                  <MapIcon className="h-4 w-4" /> Map View
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="gap-2"
+                >
+                  <ListIcon className="h-4 w-4" /> List View
+                </Button>
+              </div>
             </div>
           </div>
 

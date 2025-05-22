@@ -18,6 +18,19 @@ interface GoogleMapViewProps {
 
 const BatumiCenter = { lat: 41.6464, lng: 41.6327 }; // Approx center of Batumi
 
+const getPinStyle = (price: number): { background: string; glyphColor: string; borderColor: string } => {
+  const glyphColor = 'hsl(var(--pin-glyph-color))';
+  const borderColor = 'hsl(var(--pin-border-color))';
+
+  if (price < 500) {
+    return { background: 'hsl(var(--pin-color-blue))', glyphColor, borderColor };
+  } else if (price <= 1000) {
+    return { background: 'hsl(var(--pin-color-green))', glyphColor, borderColor };
+  } else {
+    return { background: 'hsl(var(--primary))', glyphColor: 'hsl(var(--primary-foreground))', borderColor: 'hsl(var(--primary-foreground))' };
+  }
+};
+
 export function GoogleMapView({
   properties,
   defaultCenter = BatumiCenter,
@@ -35,22 +48,25 @@ export function GoogleMapView({
         mapId="binageLiteMap" // Optional: for custom styling in Google Cloud Console
         className="h-full w-full"
       >
-        {properties.map((property) => (
-          <AdvancedMarker
-            key={property.id}
-            position={{ lat: property.lat, lng: property.lng }}
-            onClick={() => setSelectedProperty(property)}
-            title={property.name || property.address}
-          >
-            <Pin
-              background={'hsl(var(--primary))'} // Orange
-              borderColor={'hsl(var(--primary-foreground))'} // White
-              glyphColor={'hsl(var(--primary-foreground))'} // White
+        {properties.map((property) => {
+          const pinStyle = getPinStyle(property.price);
+          return (
+            <AdvancedMarker
+              key={property.id}
+              position={{ lat: property.lat, lng: property.lng }}
+              onClick={() => setSelectedProperty(property)}
+              title={property.name || property.address}
             >
-              <span className="text-xs font-bold">${property.price}</span>
-            </Pin>
-          </AdvancedMarker>
-        ))}
+              <Pin
+                background={pinStyle.background}
+                borderColor={pinStyle.borderColor}
+                glyphColor={pinStyle.glyphColor}
+              >
+                <span className="text-xs font-bold">${property.price}</span>
+              </Pin>
+            </AdvancedMarker>
+          );
+        })}
 
         {selectedProperty && (
           <InfoWindow

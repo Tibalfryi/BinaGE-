@@ -21,6 +21,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import type { PropertyFilters } from "@/types";
 import React from "react";
+import { RotateCcw } from "lucide-react";
 
 const heatingOptions = [
   { value: "central", label: "Central" },
@@ -56,45 +57,59 @@ interface PropertyFilterFormProps {
   initialFilters?: PropertyFilters;
 }
 
-export function PropertyFilterForm({ onFiltersChange, initialFilters }: PropertyFilterFormProps) {
+const defaultFilterValues: PropertyFilters = {
+  priceMin: 0,
+  priceMax: 5000,
+  roomsMin: 0,
+  areaMin: 0,
+  areaMax: 300,
+  heating: [],
+  balcony: false,
+  dishwasher: false,
+  oven: false,
+  pets: false,
+  searchQuery: "",
+};
+
+export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFilterValues }: PropertyFilterFormProps) {
   const form = useForm<FilterFormValues>({
     resolver: zodResolver(filterSchema),
-    defaultValues: {
-      priceMin: initialFilters?.priceMin ?? 0,
-      priceMax: initialFilters?.priceMax ?? 5000,
-      roomsMin: initialFilters?.roomsMin ?? 0,
-      areaMin: initialFilters?.areaMin ?? 0,
-      areaMax: initialFilters?.areaMax ?? 300,
-      heating: initialFilters?.heating ?? [],
-      balcony: initialFilters?.balcony ?? false,
-      dishwasher: initialFilters?.dishwasher ?? false,
-      oven: initialFilters?.oven ?? false,
-      pets: initialFilters?.pets ?? false,
-      searchQuery: initialFilters?.searchQuery ?? "",
-    },
+    defaultValues: initialFilters,
   });
 
   const [currentPriceRange, setCurrentPriceRange] = React.useState([
-    initialFilters?.priceMin ?? 0,
-    initialFilters?.priceMax ?? 5000,
+    initialFilters?.priceMin ?? defaultFilterValues.priceMin!,
+    initialFilters?.priceMax ?? defaultFilterValues.priceMax!,
   ]);
   
   const [currentAreaRange, setCurrentAreaRange] = React.useState([
-    initialFilters?.areaMin ?? 0,
-    initialFilters?.areaMax ?? 300,
+    initialFilters?.areaMin ?? defaultFilterValues.areaMin!,
+    initialFilters?.areaMax ?? defaultFilterValues.areaMax!,
   ]);
 
   function onSubmit(data: FilterFormValues) {
     onFiltersChange(data);
   }
+
+  const handleResetFilters = () => {
+    form.reset(defaultFilterValues);
+    setCurrentPriceRange([defaultFilterValues.priceMin!, defaultFilterValues.priceMax!]);
+    setCurrentAreaRange([defaultFilterValues.areaMin!, defaultFilterValues.areaMax!]);
+    onFiltersChange(defaultFilterValues);
+  };
   
-  // Debounce apply filters
+  // Update price range display when form values change (e.g. on reset)
   React.useEffect(() => {
-    const subscription = form.watch((values) => {
-       onFiltersChange(values as PropertyFilters);
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'priceMin' || name === 'priceMax') {
+        setCurrentPriceRange([value.priceMin ?? defaultFilterValues.priceMin!, value.priceMax ?? defaultFilterValues.priceMax!]);
+      }
+      if (name === 'areaMin' || name === 'areaMax') {
+        setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
+      }
     });
     return () => subscription.unsubscribe();
-  }, [form, onFiltersChange]);
+  }, [form]);
 
 
   return (
@@ -117,14 +132,14 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters }: Property
         <FormItem>
           <FormLabel>Price Range (USD): ${currentPriceRange[0]} - ${currentPriceRange[1]}</FormLabel>
           <Slider
-            defaultValue={[currentPriceRange[0], currentPriceRange[1]]}
+            value={[currentPriceRange[0], currentPriceRange[1]]} // Controlled component
             min={0}
             max={5000}
             step={50}
             onValueChange={(value) => {
               setCurrentPriceRange(value);
-              form.setValue("priceMin", value[0]);
-              form.setValue("priceMax", value[1]);
+              form.setValue("priceMin", value[0], { shouldDirty: true });
+              form.setValue("priceMax", value[1], { shouldDirty: true });
             }}
             className="py-2"
           />
@@ -155,14 +170,14 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters }: Property
         <FormItem>
           <FormLabel>Area (m²): {currentAreaRange[0]} - {currentAreaRange[1]}</FormLabel>
           <Slider
-            defaultValue={[currentAreaRange[0], currentAreaRange[1]]}
+            value={[currentAreaRange[0], currentAreaRange[1]]} // Controlled component
             min={0}
             max={300}
             step={5}
             onValueChange={(value) => {
               setCurrentAreaRange(value);
-              form.setValue("areaMin", value[0]);
-              form.setValue("areaMax", value[1]);
+              form.setValue("areaMin", value[0], { shouldDirty: true });
+              form.setValue("areaMax", value[1], { shouldDirty: true });
             }}
             className="py-2"
           />
@@ -237,8 +252,12 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters }: Property
             />
           ))}
         </div>
-
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Apply Filters</Button>
+        <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+          <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full sm:w-auto">
+            <RotateCcw className="mr-2 h-4 w-4" /> Reset Filters
+          </Button>
+          <Button type="submit" className="w-full flex-grow bg-primary hover:bg-primary/90 text-primary-foreground">Apply Filters</Button>
+        </div>
       </form>
     </Form>
   );
@@ -264,3 +283,4 @@ function SelectInput({ value, onValueChange, options }: SelectInputProps) {
     </RadioGroup>
   )
 }
+

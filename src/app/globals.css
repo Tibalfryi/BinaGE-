@@ -39,6 +39,13 @@
     --sidebar-accent-foreground: 0 0% 9%;
     --sidebar-border: 0 0% 85%;
     --sidebar-ring: 33 100% 50%;
+
+    /* Custom Pin Colors */
+    --pin-color-blue: 210 100% 50%; /* Price < 500 */
+    --pin-color-green: 130 60% 45%; /* Price 500-1000 */
+    /* For Price > 1000, we'll use --primary */
+    --pin-glyph-color: 0 0% 100%; /* White for good contrast on colored pins */
+    --pin-border-color: 0 0% 100%;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -74,6 +81,12 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 33 100% 50%;
+
+    /* Custom Pin Colors */
+    --pin-color-blue: 210 100% 50%;
+    --pin-color-green: 130 60% 45%;
+    --pin-glyph-color: 0 0% 100%;
+    --pin-border-color: 0 0% 100%;
   }
 }
 
