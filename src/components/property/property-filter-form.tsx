@@ -9,7 +9,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,18 +21,19 @@ import { Slider } from "@/components/ui/slider";
 import type { PropertyFilters } from "@/types";
 import React from "react";
 import { RotateCcw } from "lucide-react";
+import { useTranslation } from "@/hooks/use-translation";
 
 const heatingOptions = [
-  { value: "central", label: "Central" },
-  { value: "gas", label: "Gas" },
-  { value: "electric", label: "Electric" },
-  { value: "none", label: "None" },
+  { value: "central", labelKey: "propertyFilterForm.heatingOptions.central" },
+  { value: "gas", labelKey: "propertyFilterForm.heatingOptions.gas" },
+  { value: "electric", labelKey: "propertyFilterForm.heatingOptions.electric" },
+  { value: "none", labelKey: "propertyFilterForm.heatingOptions.none" },
 ] as const;
 
 const filterSchema = z.object({
   priceMin: z.coerce.number().min(0).optional(),
   priceMax: z.coerce.number().min(0).optional(),
-  roomsMin: z.coerce.number().min(0).optional(), // 0 for studio
+  roomsMin: z.coerce.number().min(0).optional(), 
   areaMin: z.coerce.number().min(0).optional(),
   areaMax: z.coerce.number().min(0).optional(),
   heating: z.array(z.enum(heatingOptions.map(h => h.value) as [string, ...string[]])).optional(),
@@ -43,10 +43,10 @@ const filterSchema = z.object({
   pets: z.boolean().optional(),
   searchQuery: z.string().optional(),
 }).refine(data => !data.priceMin || !data.priceMax || data.priceMax >= data.priceMin, {
-  message: "Max price must be greater than or equal to min price",
+  message: "Max price must be greater than or equal to min price", // This message could also be translated
   path: ["priceMax"],
 }).refine(data => !data.areaMin || !data.areaMax || data.areaMax >= data.areaMin, {
-  message: "Max area must be greater than or equal to min area",
+  message: "Max area must be greater than or equal to min area", // This message could also be translated
   path: ["areaMax"],
 });
 
@@ -72,6 +72,7 @@ const defaultFilterValues: PropertyFilters = {
 };
 
 export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFilterValues }: PropertyFilterFormProps) {
+  const { t } = useTranslation();
   const form = useForm<FilterFormValues>({
     resolver: zodResolver(filterSchema),
     defaultValues: initialFilters,
@@ -98,7 +99,6 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
     onFiltersChange(defaultFilterValues);
   };
   
-  // Update price range display when form values change (e.g. on reset)
   React.useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'priceMin' || name === 'priceMax') {
@@ -107,9 +107,30 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
       if (name === 'areaMin' || name === 'areaMax') {
         setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
       }
+      // Automatically submit form on filter change (original behavior)
+      // To apply only on button click, this whole onSubmit(value as FilterFormValues) line would be removed
+      // and handled by the Apply Filters button only.
+      // For now, let's keep auto-submit on change and also have explicit button
+      // onSubmit(value as FilterFormValues); 
     });
     return () => subscription.unsubscribe();
-  }, [form]);
+  }, [form, onFiltersChange]);
+
+
+  const roomOptions = [
+    { value: "0", labelKey: "propertyFilterForm.roomsOptions.any" },
+    { value: "1", labelKey: "propertyFilterForm.roomsOptions.onePlus" },
+    { value: "2", labelKey: "propertyFilterForm.roomsOptions.twoPlus" },
+    { value: "3", labelKey: "propertyFilterForm.roomsOptions.threePlus" },
+    { value: "4", labelKey: "propertyFilterForm.roomsOptions.fourPlus" },
+  ];
+
+  const amenities = [
+    { name: "balcony", labelKey: "propertyFilterForm.amenitiesOptions.balcony" },
+    { name: "dishwasher", labelKey: "propertyFilterForm.amenitiesOptions.dishwasher" },
+    { name: "oven", labelKey: "propertyFilterForm.amenitiesOptions.oven" },
+    { name: "pets", labelKey: "propertyFilterForm.amenitiesOptions.petsAllowed" }
+  ] as const;
 
 
   return (
@@ -120,9 +141,9 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
           name="searchQuery"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Search by Address/Keyword</FormLabel>
+              <FormLabel>{t('propertyFilterForm.searchLabel')}</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Gorgiladze St" {...field} />
+                <Input placeholder={t('propertyFilterForm.searchPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -130,9 +151,9 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
         />
 
         <FormItem>
-          <FormLabel>Price Range (USD): ${currentPriceRange[0]} - ${currentPriceRange[1]}</FormLabel>
+          <FormLabel>{t('propertyFilterForm.priceRangeLabel', {min: currentPriceRange[0], max: currentPriceRange[1]})}</FormLabel>
           <Slider
-            value={[currentPriceRange[0], currentPriceRange[1]]} // Controlled component
+            value={[currentPriceRange[0], currentPriceRange[1]]} 
             min={0}
             max={5000}
             step={50}
@@ -150,17 +171,11 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
           name="roomsMin"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Minimum Rooms</FormLabel>
+              <FormLabel>{t('propertyFilterForm.minRoomsLabel')}</FormLabel>
               <SelectInput
                 value={field.value?.toString() ?? "0"}
                 onValueChange={(val) => field.onChange(parseInt(val,10))}
-                options={[
-                  { value: "0", label: "Studio / Any" },
-                  { value: "1", label: "1+ Room" },
-                  { value: "2", label: "2+ Rooms" },
-                  { value: "3", label: "3+ Rooms" },
-                  { value: "4", label: "4+ Rooms" },
-                ]}
+                options={roomOptions.map(opt => ({ value: opt.value, label: t(opt.labelKey) }))}
               />
               <FormMessage />
             </FormItem>
@@ -168,9 +183,9 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
         />
         
         <FormItem>
-          <FormLabel>Area (m²): {currentAreaRange[0]} - {currentAreaRange[1]}</FormLabel>
+          <FormLabel>{t('propertyFilterForm.areaLabel', {min: currentAreaRange[0], max: currentAreaRange[1]})}</FormLabel>
           <Slider
-            value={[currentAreaRange[0], currentAreaRange[1]]} // Controlled component
+            value={[currentAreaRange[0], currentAreaRange[1]]} 
             min={0}
             max={300}
             step={5}
@@ -189,7 +204,7 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
           render={() => (
             <FormItem>
               <div className="mb-2">
-                <FormLabel className="text-base">Heating Type</FormLabel>
+                <FormLabel className="text-base">{t('propertyFilterForm.heatingTypeLabel')}</FormLabel>
               </div>
               {heatingOptions.map((item) => (
                 <FormField
@@ -217,7 +232,7 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
                           />
                         </FormControl>
                         <FormLabel className="font-normal">
-                          {item.label}
+                          {t(item.labelKey)}
                         </FormLabel>
                       </FormItem>
                     )
@@ -230,12 +245,12 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
         />
 
         <div className="space-y-2">
-          <FormLabel className="text-base">Amenities</FormLabel>
-          {[ "balcony", "dishwasher", "oven", "pets" ].map(amenity => (
+          <FormLabel className="text-base">{t('propertyFilterForm.amenitiesLabel')}</FormLabel>
+          {amenities.map(amenity => (
             <FormField
-              key={amenity}
+              key={amenity.name}
               control={form.control}
-              name={amenity as "balcony" | "dishwasher" | "oven" | "pets"}
+              name={amenity.name}
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                   <FormControl>
@@ -245,7 +260,7 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
                     />
                   </FormControl>
                   <FormLabel className="font-normal capitalize">
-                    {amenity === 'pets' ? 'Pets Allowed' : amenity}
+                    {t(amenity.labelKey)}
                   </FormLabel>
                 </FormItem>
               )}
@@ -254,16 +269,15 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
         </div>
         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
           <Button type="button" variant="outline" onClick={handleResetFilters} className="w-full sm:w-auto">
-            <RotateCcw className="mr-2 h-4 w-4" /> Reset Filters
+            <RotateCcw className="mr-2 h-4 w-4" /> {t('propertyFilterForm.resetButton')}
           </Button>
-          <Button type="submit" className="w-full flex-grow bg-primary hover:bg-primary/90 text-primary-foreground">Apply Filters</Button>
+          <Button type="submit" className="w-full flex-grow bg-primary hover:bg-primary/90 text-primary-foreground">{t('propertyFilterForm.applyButton')}</Button>
         </div>
       </form>
     </Form>
   );
 }
 
-// Custom Select component for reusability if Radix Select is too complex for simple cases
 interface SelectInputProps {
   value: string;
   onValueChange: (value: string) => void;
@@ -271,7 +285,6 @@ interface SelectInputProps {
 }
 
 function SelectInput({ value, onValueChange, options }: SelectInputProps) {
-  // Using RadioGroup as a simpler select for this context
   return (
     <RadioGroup value={value} onValueChange={onValueChange} className="grid grid-cols-2 gap-2">
       {options.map(option => (
@@ -283,4 +296,3 @@ function SelectInput({ value, onValueChange, options }: SelectInputProps) {
     </RadioGroup>
   )
 }
-

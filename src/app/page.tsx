@@ -7,7 +7,7 @@ import { FilterSidebar } from '@/components/layout/filter-sidebar';
 import { GoogleMapView } from '@/components/map/google-map-view';
 import { PropertyListView } from '@/components/property/property-list-view';
 import { Button } from '@/components/ui/button';
-import { MapIcon, ListIcon, Loader2, ArrowDownNarrowWide, ArrowUpNarrowWide, X } from 'lucide-react';
+import { MapIcon, ListIcon, Loader2, ArrowDownNarrowWide, ArrowUpNarrowWide } from 'lucide-react';
 import type { Property, PropertyFilters } from '@/types';
 import { mockProperties } from '@/data/mock-data';
 import { SidebarInset } from '@/components/ui/sidebar';
@@ -17,7 +17,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
+import { useTranslation } from '@/hooks/use-translation';
 
 
 type ViewMode = 'map' | 'list';
@@ -44,12 +45,10 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
-  // Simulate fetching properties
   useEffect(() => {
-    // In a real app, fetch properties from an API
     setProperties(mockProperties);
-    // Initial filtering and sorting will be handled by the main effect
   }, []);
 
   const applyFiltersAndSorting = useCallback((allProps: Property[], currentFilters: PropertyFilters, currentSortOrder: SortOrder): Property[] => {
@@ -81,26 +80,23 @@ export default function HomePage() {
     } else if (currentSortOrder === 'price_desc') {
       processedProps.sort((a, b) => b.price - a.price);
     }
-    // If 'none', no explicit sort, relies on original or previous sort if stable
-
+    
     return processedProps;
   }, []);
 
   useEffect(() => {
     setIsLoading(true);
-    // Simulate delay for processing
     const timer = setTimeout(() => {
       const newFilteredSortedProperties = applyFiltersAndSorting(properties, filters, sortOrder);
       setFilteredProperties(newFilteredSortedProperties);
       setIsLoading(false);
-    }, 300); // Short delay to simulate processing
+    }, 300); 
     return () => clearTimeout(timer);
   }, [properties, filters, sortOrder, applyFiltersAndSorting]);
 
 
   const handleFiltersChange = useCallback((newFilters: PropertyFilters) => {
     setFilters(newFilters);
-    // The useEffect above will handle re-filtering and re-sorting
   }, []);
 
   const handleSortChange = (value: string) => {
@@ -118,19 +114,19 @@ export default function HomePage() {
             <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="w-full sm:w-auto">
                  <Select value={sortOrder} onValueChange={handleSortChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Sort by..." />
+                  <SelectTrigger className="w-full sm:w-[220px]">
+                    <SelectValue placeholder={t('homePage.sortByPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No Sorting</SelectItem>
+                    <SelectItem value="none">{t('homePage.sortOptions.none')}</SelectItem>
                     <SelectItem value="price_asc">
                       <div className="flex items-center gap-2">
-                        <ArrowUpNarrowWide className="h-4 w-4" /> Price: Low to High
+                        <ArrowUpNarrowWide className="h-4 w-4" /> {t('homePage.sortOptions.priceAsc')}
                       </div>
                     </SelectItem>
                     <SelectItem value="price_desc">
                        <div className="flex items-center gap-2">
-                        <ArrowDownNarrowWide className="h-4 w-4" /> Price: High to Low
+                        <ArrowDownNarrowWide className="h-4 w-4" /> {t('homePage.sortOptions.priceDesc')}
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -143,7 +139,7 @@ export default function HomePage() {
                   onClick={() => setViewMode('map')}
                   className="mr-2 gap-2"
                 >
-                  <MapIcon className="h-4 w-4" /> Map View
+                  <MapIcon className="h-4 w-4" /> {t('homePage.mapViewButton')}
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'outline'}
@@ -151,13 +147,13 @@ export default function HomePage() {
                   onClick={() => setViewMode('list')}
                   className="gap-2"
                 >
-                  <ListIcon className="h-4 w-4" /> List View
+                  <ListIcon className="h-4 w-4" /> {t('homePage.listViewButton')}
                 </Button>
               </div>
             </div>
           </div>
 
-          <main className="flex-1 overflow-auto p-0 md:p-1 relative"> {/* Adjusted padding for map */}
+          <main className="flex-1 overflow-auto p-0 md:p-1 relative"> 
             {isLoading ? (
               <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-50">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />

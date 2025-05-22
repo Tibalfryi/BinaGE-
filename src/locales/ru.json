@@ -1,0 +1,52 @@
+{
+  "appHeader": {
+    "aiAssistant": "AI Помощник",
+    "profileAlt": "Профиль"
+  },
+  "filterSidebar": {
+    "title": "Фильтры"
+  },
+  "propertyFilterForm": {
+    "searchLabel": "Поиск по адресу/ключевому слову",
+    "searchPlaceholder": "например, ул. Горгиладзе",
+    "priceRangeLabel": "Диапазон цен (USD): ${min} - ${max}",
+    "minRoomsLabel": "Минимум комнат",
+    "roomsOptions": {
+      "any": "Студия / Любое",
+      "onePlus": "1+ комната",
+      "twoPlus": "2+ комнаты",
+      "threePlus": "3+ комнаты",
+      "fourPlus": "4+ комнаты"
+    },
+    "areaLabel": "Площадь (м²): ${min} - ${max}",
+    "heatingTypeLabel": "Тип отопления",
+    "heatingOptions": {
+      "central": "Центральное",
+      "gas": "Газовое",
+      "electric": "Электрическое",
+      "none": "Нет"
+    },
+    "amenitiesLabel": "Удобства",
+    "amenitiesOptions": {
+      "balcony": "Балкон",
+      "dishwasher": "Посудомоечная машина",
+      "oven": "Духовка",
+      "petsAllowed": "Можно с животными"
+    },
+    "resetButton": "Сбросить фильтры",
+    "applyButton": "Применить фильтры"
+  },
+  "homePage": {
+    "sortByPlaceholder": "Сортировать по...",
+    "sortOptions": {
+      "none": "Без сортировки",
+      "priceAsc": "Цена: по возрастанию",
+      "priceDesc": "Цена: по убыванию"
+    },
+    "mapViewButton": "Вид на карте",
+    "listViewButton": "Вид списком"
+  },
+  "languageSwitcher": {
+    "selectLanguage": "Выберите язык"
+  }
+}

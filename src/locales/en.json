@@ -1,0 +1,52 @@
+{
+  "appHeader": {
+    "aiAssistant": "AI Assistant",
+    "profileAlt": "Profile"
+  },
+  "filterSidebar": {
+    "title": "Filters"
+  },
+  "propertyFilterForm": {
+    "searchLabel": "Search by Address/Keyword",
+    "searchPlaceholder": "e.g., Gorgiladze St",
+    "priceRangeLabel": "Price Range (USD): ${min} - ${max}",
+    "minRoomsLabel": "Minimum Rooms",
+    "roomsOptions": {
+      "any": "Studio / Any",
+      "onePlus": "1+ Room",
+      "twoPlus": "2+ Rooms",
+      "threePlus": "3+ Rooms",
+      "fourPlus": "4+ Rooms"
+    },
+    "areaLabel": "Area (m²): ${min} - ${max}",
+    "heatingTypeLabel": "Heating Type",
+    "heatingOptions": {
+      "central": "Central",
+      "gas": "Gas",
+      "electric": "Electric",
+      "none": "None"
+    },
+    "amenitiesLabel": "Amenities",
+    "amenitiesOptions": {
+      "balcony": "Balcony",
+      "dishwasher": "Dishwasher",
+      "oven": "Oven",
+      "petsAllowed": "Pets Allowed"
+    },
+    "resetButton": "Reset Filters",
+    "applyButton": "Apply Filters"
+  },
+  "homePage": {
+    "sortByPlaceholder": "Sort by...",
+    "sortOptions": {
+      "none": "No Sorting",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low"
+    },
+    "mapViewButton": "Map View",
+    "listViewButton": "List View"
+  },
+  "languageSwitcher": {
+    "selectLanguage": "Select Language"
+  }
+}

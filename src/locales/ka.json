@@ -1,0 +1,52 @@
+{
+  "appHeader": {
+    "aiAssistant": "AI ასისტენტი",
+    "profileAlt": "პროფილი"
+  },
+  "filterSidebar": {
+    "title": "ფილტრები"
+  },
+  "propertyFilterForm": {
+    "searchLabel": "ძიება მისამართით/საკვანძო სიტყვით",
+    "searchPlaceholder": "მაგ., გორგილაძის ქ.",
+    "priceRangeLabel": "ფასების დიაპაზონი (USD): ${min} - ${max}",
+    "minRoomsLabel": "ოთახების მინ. რაოდენობა",
+    "roomsOptions": {
+      "any": "სტუდიო / ნებისმიერი",
+      "onePlus": "1+ ოთახი",
+      "twoPlus": "2+ ოთახი",
+      "threePlus": "3+ ოთახი",
+      "fourPlus": "4+ ოთახი"
+    },
+    "areaLabel": "ფართობი (მ²): ${min} - ${max}",
+    "heatingTypeLabel": "გათბობის ტიპი",
+    "heatingOptions": {
+      "central": "ცენტრალური",
+      "gas": "გაზი",
+      "electric": "ელექტრო",
+      "none": "არა"
+    },
+    "amenitiesLabel": "კეთილმოწყობა",
+    "amenitiesOptions": {
+      "balcony": "აივანი",
+      "dishwasher": "ჭურჭლის სარეცხი მანქანა",
+      "oven": "ღუმელი",
+      "petsAllowed": "ცხოველები ნებადართულია"
+    },
+    "resetButton": "ფილტრების გასუფთავება",
+    "applyButton": "ფილტრების გამოყენება"
+  },
+  "homePage": {
+    "sortByPlaceholder": "დალაგება...",
+    "sortOptions": {
+      "none": "დალაგების გარეშე",
+      "priceAsc": "ფასი: ზრდადობით",
+      "priceDesc": "ფასი: კლებადობით"
+    },
+    "mapViewButton": "რუკის ხედი",
+    "listViewButton": "სიის ხედი"
+  },
+  "languageSwitcher": {
+    "selectLanguage": "აირჩიეთ ენა"
+  }
+}
