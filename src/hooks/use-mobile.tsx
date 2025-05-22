@@ -1,22 +1,29 @@
+// @/hooks/use-mobile.tsx
 "use client";
 
-import * as React from "react"
+import { useState, useEffect } from "react";
 
-const MOBILE_BREAKPOINT = 768
+const MOBILE_BREAKPOINT = 768;
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+  // Default to false (desktop-first approach) to ensure server and initial client render match.
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    }
-    mql.addEventListener("change", onChange)
-    // Set initial state
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT) 
-    return () => mql.removeEventListener("change", onChange)
-  }, [])
+  useEffect(() => {
+    // This effect runs only on the client, after the initial render (post-hydration).
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
 
-  return !!isMobile
+    // Set the correct value on the client after mount
+    checkDevice();
+
+    // Listen for resize events
+    window.addEventListener("resize", checkDevice);
+
+    // Cleanup listener on component unmount
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []); // Empty dependency array ensures this effect runs only once on mount and unmount.
+
+  return isMobile;
 }
