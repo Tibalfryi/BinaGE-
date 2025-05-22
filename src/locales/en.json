@@ -1,3 +1,4 @@
+
 {
   "appHeader": {
     "aiAssistant": "AI Assistant",
@@ -48,5 +49,40 @@
   },
   "languageSwitcher": {
     "selectLanguage": "Select Language"
+  },
+  "propertyDetailPage": {
+    "rentInBatumi": "Rent in Batumi",
+    "propertyNotFound": "Property Not Found",
+    "propertyNotFoundTitle": "Oops! Property Not Found",
+    "propertyNotFoundMessage": "The property you're looking for doesn't exist or has been removed.",
+    "backButton": "Back to Listings",
+    "priceUnit": "USD/month",
+    "addedToFavorites": "Added to favorites!",
+    "removedFromFavorites": "Removed from favorites.",
+    "checkOutProperty": "Check out this property",
+    "shareError": "Could not share property.",
+    "shareNotAvailable": "Share functionality is not available on your browser.",
+    "propertyDetailsTitle": "Property Details",
+    "keyFeaturesTitle": "Key Features",
+    "features": {
+      "rooms": "Rooms",
+      "studio": "Studio",
+      "area": "Area",
+      "floor": "Floor",
+      "heating": "Heating",
+      "balcony": "Balcony",
+      "dishwasher": "Dishwasher",
+      "oven": "Oven",
+      "petsAllowed": "Pets Allowed"
+    },
+    "descriptionTitle": "Description",
+    "contactLandlordTitle": "Contact Landlord",
+    "contact": {
+      "email": "Email Landlord",
+      "call": "Call Landlord",
+      "notProvided": "Contact information not provided."
+    },
+    "shareButton": "Share Property",
+    "contactLandlordMobilePrompt": "Contact options are available above, or implement a modal here."
   }
 }

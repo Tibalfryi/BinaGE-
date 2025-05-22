@@ -1,3 +1,4 @@
+
 {
   "appHeader": {
     "aiAssistant": "AI ასისტენტი",
@@ -48,5 +49,40 @@
   },
   "languageSwitcher": {
     "selectLanguage": "აირჩიეთ ენა"
+  },
+  "propertyDetailPage": {
+    "rentInBatumi": "ქირავდება ბათუმში",
+    "propertyNotFound": "ბინა ვერ მოიძებნა",
+    "propertyNotFoundTitle": "უი! ბინა ვერ მოიძებნა",
+    "propertyNotFoundMessage": "თქვენ მიერ მოძიებული ბინა არ არსებობს ან წაშლილია.",
+    "backButton": "უკან სიაში",
+    "priceUnit": "USD/თვეში",
+    "addedToFavorites": "დამატებულია რჩეულებში!",
+    "removedFromFavorites": "ამოღებულია რჩეულებიდან.",
+    "checkOutProperty": "შეამოწმეთ ეს ბინა",
+    "shareError": "ბინის გაზიარება ვერ მოხერხდა.",
+    "shareNotAvailable": "გაზიარების ფუნქცია მიუწვდომელია თქვენს ბრაუზერში.",
+    "propertyDetailsTitle": "ბინის დეტალები",
+    "keyFeaturesTitle": "ძირითადი მახასიათებლები",
+    "features": {
+      "rooms": "ოთახები",
+      "studio": "სტუდიო",
+      "area": "ფართობი",
+      "floor": "სართული",
+      "heating": "გათბობა",
+      "balcony": "აივანი",
+      "dishwasher": "ჭურჭლის სარეცხი მანქანა",
+      "oven": "ღუმელი",
+      "petsAllowed": "ცხოველები ნებადართულია"
+    },
+    "descriptionTitle": "აღწერა",
+    "contactLandlordTitle": "დაუკავშირდით მფლობელს",
+    "contact": {
+      "email": "მიწერეთ მფლობელს",
+      "call": "დაურეკეთ მფლობელს",
+      "notProvided": "საკონტაქტო ინფორმაცია მითითებული არ არის."
+    },
+    "shareButton": "ბინის გაზიარება",
+    "contactLandlordMobilePrompt": "კონტაქტის ვარიანტები ხელმისაწვდომია ზემოთ, ან აქ შეიძლება მოდალური ფანჯრის იმპლემენტაცია."
   }
 }

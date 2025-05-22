@@ -1,3 +1,4 @@
+
 {
   "appHeader": {
     "aiAssistant": "AI Помощник",
@@ -48,5 +49,40 @@
   },
   "languageSwitcher": {
     "selectLanguage": "Выберите язык"
+  },
+  "propertyDetailPage": {
+    "rentInBatumi": "Аренда в Батуми",
+    "propertyNotFound": "Объект не найден",
+    "propertyNotFoundTitle": "Упс! Объект не найден",
+    "propertyNotFoundMessage": "Объект, который вы ищете, не существует или был удален.",
+    "backButton": "Назад к списку",
+    "priceUnit": "USD/мес.",
+    "addedToFavorites": "Добавлено в избранное!",
+    "removedFromFavorites": "Удалено из избранного.",
+    "checkOutProperty": "Посмотрите этот объект",
+    "shareError": "Не удалось поделиться объектом.",
+    "shareNotAvailable": "Функция 'Поделиться' недоступна в вашем браузере.",
+    "propertyDetailsTitle": "Детали объекта",
+    "keyFeaturesTitle": "Ключевые особенности",
+    "features": {
+      "rooms": "Комнаты",
+      "studio": "Студия",
+      "area": "Площадь",
+      "floor": "Этаж",
+      "heating": "Отопление",
+      "balcony": "Балкон",
+      "dishwasher": "Посудомойка",
+      "oven": "Духовка",
+      "petsAllowed": "Можно с животными"
+    },
+    "descriptionTitle": "Описание",
+    "contactLandlordTitle": "Связаться с владельцем",
+    "contact": {
+      "email": "Написать владельцу",
+      "call": "Позвонить владельцу",
+      "notProvided": "Контактная информация не предоставлена."
+    },
+    "shareButton": "Поделиться объектом",
+    "contactLandlordMobilePrompt": "Варианты связи доступны выше или здесь можно реализовать модальное окно."
   }
 }
