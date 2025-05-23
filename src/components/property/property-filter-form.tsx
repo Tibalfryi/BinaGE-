@@ -36,7 +36,7 @@ const filterSchema = z.object({
   priceMax: z.coerce.number().min(0).optional(),
   roomsMin: z.coerce.number().min(0).optional(), 
   areaMin: z.coerce.number().min(0).optional(),
-  areaMax: z.coerce.number().min(0).max(300).optional(), // Max area validation
+  areaMax: z.coerce.number().min(0).max(300).optional(), 
   heating: z.array(z.enum(heatingOptions.map(h => h.value) as [string, ...string[]])).optional(),
   balcony: z.boolean().optional(),
   dishwasher: z.boolean().optional(),
@@ -61,8 +61,8 @@ interface PropertyFilterFormProps {
 const defaultFilterValues: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
-  roomsMin: 0,
-  areaMin: 30, // Default min area adjusted from 300 back to a more common value
+  roomsMin: 0, // Default to "Studio" (value 0)
+  areaMin: 30, 
   areaMax: 300,
   heating: [],
   balcony: false,
@@ -89,18 +89,8 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
     initialFilters?.areaMax ?? defaultFilterValues.areaMax!,
   ]);
 
-  // This function is called when form.watch detects a change
-  // We only call onFiltersChange if the form is valid and the "Apply Filters" button would be clicked.
-  // However, the current design applies filters explicitly via button.
-  // So, this useEffect reacting to form.watch and calling onFiltersChange is removed
-  // to align with "Apply Filters" button controlling the filter application.
 
-  // Instead, we just submit the form's data when the submit button is pressed.
   function onSubmit(data: FilterFormValues) {
-    // Ensure priceMin and priceMax from the slider are included if they were form fields
-    // Or directly use currentPriceRange if slider values are not part of react-hook-form's state.
-    // The current setup correctly uses form.setValue to update priceMin and priceMax
-    // from the slider's onValueChange.
     onFiltersChange(data);
   }
 
@@ -108,11 +98,9 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
     form.reset(defaultFilterValues);
     setCurrentPriceRange([defaultFilterValues.priceMin!, defaultFilterValues.priceMax!]);
     setCurrentAreaRange([defaultFilterValues.areaMin!, defaultFilterValues.areaMax!]);
-    // Optionally, call onFiltersChange immediately on reset, or require "Apply Filters"
     onFiltersChange(defaultFilterValues); 
   };
   
-  // Update local state for sliders when form values change (e.g. on reset)
   React.useEffect(() => {
     const subscription = form.watch((value) => {
       setCurrentPriceRange([value.priceMin ?? defaultFilterValues.priceMin!, value.priceMax ?? defaultFilterValues.priceMax!]);
@@ -123,11 +111,11 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
 
 
   const roomOptions = [
-    { value: "0", labelKey: "propertyFilterForm.roomsOptions.any" },
-    { value: "1", labelKey: "propertyFilterForm.roomsOptions.onePlus" },
-    { value: "2", labelKey: "propertyFilterForm.roomsOptions.twoPlus" },
-    { value: "3", labelKey: "propertyFilterForm.roomsOptions.threePlus" },
-    { value: "4", labelKey: "propertyFilterForm.roomsOptions.fourPlus" },
+    { value: "0", labelKey: "propertyFilterForm.roomsOptions.studio" },
+    { value: "1", labelKey: "propertyFilterForm.roomsOptions.onePlusOne" },
+    { value: "2", labelKey: "propertyFilterForm.roomsOptions.twoPlusOne" },
+    { value: "3", labelKey: "propertyFilterForm.roomsOptions.threePlusOne" },
+    { value: "4", labelKey: "propertyFilterForm.roomsOptions.fourPlusPlus" },
   ];
 
   const amenities = [
@@ -158,34 +146,26 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
         <FormItem>
           <FormLabel>{t('propertyFilterForm.priceRangeLabel', {min: currentPriceRange[0], max: currentPriceRange[1]})}</FormLabel>
           <Slider
-            value={currentPriceRange} // Use the local state for the slider's value
+            value={currentPriceRange} 
             min={0}
             max={5000}
-            step={50} // Step set to 50
+            step={50} 
             onValueChange={(value) => {
-              setCurrentPriceRange(value); // Update local state for visual feedback
+              setCurrentPriceRange(value); 
               form.setValue("priceMin", value[0], { shouldDirty: true });
               form.setValue("priceMax", value[1], { shouldDirty: true });
             }}
             className="py-2"
           />
-           {/* Hidden inputs to register priceMin and priceMax with react-hook-form if needed,
-               but form.setValue already does this. Kept for clarity/explicitness if preferred.
-               Alternatively, ensure priceMin and priceMax are part of form state via other means or handled directly.
-               The current approach with form.setValue is fine.
-           */}
         </FormItem>
-        {/* Ensure form fields for priceMin and priceMax exist if not directly controlled by Slider */}
-        {/* These are implicitly handled by form.setValue in onValueChange of the Slider */}
-
 
         <FormField
           control={form.control}
           name="roomsMin"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('propertyFilterForm.minRoomsLabel')}</FormLabel>
-              <SelectInput
+              <FormLabel>{t('propertyFilterForm.roomsLabel')}</FormLabel>
+              <StyledRadioGroup
                 value={field.value?.toString() ?? "0"}
                 onValueChange={(val) => field.onChange(parseInt(val,10))}
                 options={roomOptions.map(opt => ({ value: opt.value, label: t(opt.labelKey) }))}
@@ -198,12 +178,12 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
         <FormItem>
           <FormLabel>{t('propertyFilterForm.areaLabel', {min: currentAreaRange[0], max: currentAreaRange[1]})}</FormLabel>
           <Slider
-            value={currentAreaRange} // Use the local state for the slider's value
+            value={currentAreaRange} 
             min={0}
             max={300}
             step={5}
             onValueChange={(value) => {
-              setCurrentAreaRange(value); // Update local state for visual feedback
+              setCurrentAreaRange(value); 
               form.setValue("areaMin", value[0], { shouldDirty: true });
               form.setValue("areaMax", value[1], { shouldDirty: true });
             }}
@@ -291,20 +271,25 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
   );
 }
 
-interface SelectInputProps {
+interface StyledRadioGroupProps {
   value: string;
   onValueChange: (value: string) => void;
   options: { value: string; label: string }[];
 }
 
-function SelectInput({ value, onValueChange, options }: SelectInputProps) {
+function StyledRadioGroup({ value, onValueChange, options }: StyledRadioGroupProps) {
   return (
-    <RadioGroup value={value} onValueChange={onValueChange} className="grid grid-cols-2 gap-2">
+    <RadioGroup value={value} onValueChange={onValueChange} className="flex flex-wrap gap-2 pt-1">
       {options.map(option => (
-        <FormItem key={option.value} className="flex items-center space-x-2">
-          <RadioGroupItem value={option.value} id={`rooms-${option.value}`} />
-          <Label htmlFor={`rooms-${option.value}`} className="font-normal">{option.label}</Label>
-        </FormItem>
+        <div key={option.value}>
+          <RadioGroupItem value={option.value} id={`rooms-${option.value}`} className="sr-only peer" />
+          <Label
+            htmlFor={`rooms-${option.value}`}
+            className="block cursor-pointer rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors"
+          >
+            {option.label}
+          </Label>
+        </div>
       ))}
     </RadioGroup>
   )

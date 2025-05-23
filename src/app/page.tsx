@@ -27,8 +27,8 @@ type SortOrder = 'none' | 'price_asc' | 'price_desc';
 const defaultFilters: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
-  roomsMin: 0,
-  areaMin: 0,
+  roomsMin: 0, // Default to "Studio / Any" logic initially
+  areaMin: 30,
   areaMax: 300,
   heating: [],
   balcony: false,
@@ -55,7 +55,16 @@ export default function HomePage() {
     let processedProps = allProps.filter(prop => {
       if (currentFilters.priceMin !== undefined && prop.price < currentFilters.priceMin) return false;
       if (currentFilters.priceMax !== undefined && prop.price > currentFilters.priceMax) return false;
-      if (currentFilters.roomsMin !== undefined && prop.rooms < currentFilters.roomsMin) return false;
+      
+      // Updated rooms filter logic
+      if (currentFilters.roomsMin !== undefined) {
+        if (currentFilters.roomsMin === 0) { // "Studio" selected
+          if (prop.rooms !== 0) return false; // Only show actual studios
+        } else { // "1+1", "2+1", etc. selected
+          if (prop.rooms < currentFilters.roomsMin) return false;
+        }
+      }
+      
       if (currentFilters.areaMin !== undefined && prop.area < currentFilters.areaMin) return false;
       if (currentFilters.areaMax !== undefined && prop.area > currentFilters.areaMax) return false;
       if (currentFilters.heating && currentFilters.heating.length > 0 && !currentFilters.heating.includes(prop.heating)) return false;

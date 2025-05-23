@@ -11,8 +11,13 @@
     "searchLabel": "Search by Address/Keyword",
     "searchPlaceholder": "e.g., Gorgiladze St",
     "priceRangeLabel": "Price Range (USD): ${min} - ${max}",
-    "minRoomsLabel": "Minimum Rooms",
+    "roomsLabel": "Number of Rooms",
     "roomsOptions": {
+      "studio": "Studio",
+      "onePlusOne": "1+1",
+      "twoPlusOne": "2+1",
+      "threePlusOne": "3+1",
+      "fourPlusPlus": "4+1+",
       "any": "Studio / Any",
       "onePlus": "1+ Room",
       "twoPlus": "2+ Rooms",
@@ -90,4 +95,3 @@
     "contactLandlordMobilePrompt": "Contact options are available above. Scroll to view."
   }
 }
-
