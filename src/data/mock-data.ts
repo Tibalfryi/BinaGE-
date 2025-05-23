@@ -11,11 +11,12 @@ export const mockProperties: Property[] = [
     rooms: 0, // Studio
     area: 45,
     floor: 10,
-    heating: 'air_conditioner', // Updated
+    heating: 'air_conditioner',
     pets: true,
     dishwasher: true,
     oven: true,
-    balcony: true,
+    separateKitchen: true, // Was balcony
+    hasBathtub: true, // Added
     photo_urls: [
       'https://placehold.co/600x400.png?text=Apartment+1+View+1',
       'https://placehold.co/600x400.png?text=Apartment+1+View+2',
@@ -34,11 +35,12 @@ export const mockProperties: Property[] = [
     rooms: 2,
     area: 65,
     floor: 3,
-    heating: 'underfloor_heating', // Updated
+    heating: 'underfloor_heating',
     pets: false,
     dishwasher: true,
     oven: false,
-    balcony: true,
+    separateKitchen: true, // Was balcony
+    hasBathtub: false, // Added
     photo_urls: [
       'https://placehold.co/600x400.png?text=Apartment+2+View+1',
     ],
@@ -56,11 +58,12 @@ export const mockProperties: Property[] = [
     rooms: 1,
     area: 80,
     floor: 5,
-    heating: 'karma', // Updated
+    heating: 'karma',
     pets: true,
     dishwasher: false,
     oven: true,
-    balcony: false,
+    separateKitchen: false, // Was balcony
+    hasBathtub: true, // Added
     photo_urls: [
       'https://placehold.co/600x400.png?text=Apartment+3+View+1',
       'https://placehold.co/600x400.png?text=Apartment+3+View+2',
@@ -84,7 +87,8 @@ export const mockProperties: Property[] = [
     pets: false,
     dishwasher: true,
     oven: true,
-    balcony: true,
+    separateKitchen: true, // Was balcony
+    hasBathtub: true, // Added
     photo_urls: [
       'https://placehold.co/600x400.png?text=Apartment+4+View+1',
     ],
@@ -97,16 +101,17 @@ export const mockProperties: Property[] = [
     name: 'Penthouse with Panoramic Views',
     address: '200 Khimshiashvili St, Batumi',
     lat: 41.6300,
-    lng: 41.6100, // Further along the coast
+    lng: 41.6100, 
     price: 1500,
     rooms: 4,
     area: 150,
     floor: 25,
-    heating: 'electric', // Updated
+    heating: 'electric',
     pets: true,
     dishwasher: true,
     oven: true,
-    balcony: true,
+    separateKitchen: false, // Was balcony
+    hasBathtub: true, // Added
     photo_urls: [
       'https://placehold.co/600x400.png?text=Apartment+5+View+1',
       'https://placehold.co/600x400.png?text=Apartment+5+View+2',

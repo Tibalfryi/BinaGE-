@@ -17,12 +17,7 @@
       "onePlusOne": "1+1",
       "twoPlusOne": "2+1",
       "threePlusOne": "3+1",
-      "fourPlusPlus": "4+1+",
-      "any": "სტუდიო / ნებისმიერი",
-      "onePlus": "1+ ოთახი",
-      "twoPlus": "2+ ოთახი",
-      "threePlus": "3+ ოთახი",
-      "fourPlus": "4+ ოთახი"
+      "fourPlusPlus": "4+1+"
     },
     "areaLabel": "ფართობი (მ²): ${min} - ${max}",
     "heatingTypeLabel": "გათბობის ტიპი",
@@ -36,12 +31,12 @@
       "underfloor_heating": "იატაკის გათბობა",
       "karma": "კარმა"
     },
-    "amenitiesLabel": "კეთილმოწყობა",
     "amenitiesOptions": {
-      "balcony": "აივანი",
+      "separateKitchen": "იზოლირებული სამზარეულო",
+      "hasBathtub": "აბაზანა",
       "dishwasher": "ჭურჭლის სარეცხი მანქანა",
       "oven": "ღუმელი",
-      "petsAllowed": "ცხოველები ნებადართულია"
+      "petsAllowed": "ცხოველები დასაშვებია"
     },
     "resetButton": "ფილტრების გასუფთავება",
     "applyButton": "ფილტრების გამოყენება"
@@ -82,10 +77,11 @@
       "area": "ფართობი",
       "floor": "სართული",
       "heating": "გათბობა",
-      "balcony": "აივანი",
+      "separateKitchen": "იზოლირებული სამზარეულო",
+      "hasBathtub": "აბაზანა",
       "dishwasher": "ჭურჭლის სარეცხი მანქანა",
       "oven": "ღუმელი",
-      "petsAllowed": "ცხოველები ნებადართულია"
+      "petsAllowed": "ცხოველები დასაშვებია"
     },
     "descriptionTitle": "აღწერა",
     "contactLandlordTitle": "დაუკავშირდით მფლობელს",

@@ -11,7 +11,8 @@ export interface Property {
   pets: boolean;
   dishwasher: boolean;
   oven: boolean;
-  balcony: boolean;
+  separateKitchen: boolean; // Changed from balcony
+  hasBathtub: boolean; // Added
   photo_urls: string[];
   description: string;
   is_favorite?: boolean; // For current user context
@@ -30,7 +31,8 @@ export interface PropertyFilters {
   areaMin?: number;
   areaMax?:number;
   heating?: Property['heating'][];
-  balcony?: boolean;
+  separateKitchen?: boolean; // Changed from balcony
+  hasBathtub?: boolean; // Added
   dishwasher?: boolean;
   oven?: boolean;
   pets?: boolean;

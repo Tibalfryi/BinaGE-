@@ -17,12 +17,7 @@
       "onePlusOne": "1+1",
       "twoPlusOne": "2+1",
       "threePlusOne": "3+1",
-      "fourPlusPlus": "4+1+",
-      "any": "Студия / Любое",
-      "onePlus": "1+ комната",
-      "twoPlus": "2+ комнаты",
-      "threePlus": "3+ комнаты",
-      "fourPlus": "4+ комнаты"
+      "fourPlusPlus": "4+1+"
     },
     "areaLabel": "Площадь (м²): ${min} - ${max}",
     "heatingTypeLabel": "Тип отопления",
@@ -36,12 +31,12 @@
       "underfloor_heating": "Теплый пол",
       "karma": "Карма"
     },
-    "amenitiesLabel": "Удобства",
     "amenitiesOptions": {
-      "balcony": "Балкон",
+      "separateKitchen": "Кухня отдельно",
+      "hasBathtub": "Ванна",
       "dishwasher": "Посудомоечная машина",
       "oven": "Духовка",
-      "petsAllowed": "Можно с животными"
+      "petsAllowed": "Можно с питомцами"
     },
     "resetButton": "Сбросить фильтры",
     "applyButton": "Применить фильтры"
@@ -82,10 +77,11 @@
       "area": "Площадь",
       "floor": "Этаж",
       "heating": "Отопление",
-      "balcony": "Балкон",
+      "separateKitchen": "Кухня отдельно",
+      "hasBathtub": "Ванна",
       "dishwasher": "Посудомойка",
       "oven": "Духовка",
-      "petsAllowed": "Можно с животными"
+      "petsAllowed": "Можно с питомцами"
     },
     "descriptionTitle": "Описание",
     "contactLandlordTitle": "Связаться с владельцем",

@@ -1,3 +1,4 @@
+
 // src/app/property/[id]/page.tsx
 "use client"; 
 
@@ -10,8 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { 
-  ArrowLeft, BedDouble, Building, DollarSign, Dog, CheckCircle, XCircle, Mail, Phone, Send, Ruler, Heater, Home as HomeIcon, Share2, Heart, MessageCircle, Info, MapPin, DoorOpen, Bath // Added MapPin, DoorOpen, Bath
-} from 'lucide-react';
+  ArrowLeft, BedDouble, Building, DollarSign, Dog, CheckCircle, XCircle, Mail, Phone, Send, Ruler, Heater, Home as HomeIcon, Share2, Heart, MessageCircle, Info, MapPin, DoorOpen, Bath, UtensilsCrossed, CookingPot
+} from 'lucide-react'; // Added MapPin, DoorOpen, Bath, UtensilsCrossed, CookingPot
 import { AppHeader } from '@/components/layout/app-header';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslation } from '@/hooks/use-translation'; 
@@ -73,7 +74,6 @@ export default function PropertyDetailPage() {
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
-    // Here you would typically update the backend or global state
     alert(isFavorite ? t('propertyDetailPage.removedFromFavorites') : t('propertyDetailPage.addedToFavorites'));
   };
 
@@ -99,8 +99,9 @@ export default function PropertyDetailPage() {
     { labelKey: 'propertyDetailPage.features.area', value: `${property.area} m²`, icon: <Ruler className="w-6 h-6" /> },
     { labelKey: 'propertyDetailPage.features.floor', value: String(property.floor), icon: <Building className="w-6 h-6" /> },
     { labelKey: 'propertyDetailPage.features.heating', value: t(`propertyFilterForm.heatingOptions.${property.heating}` as any) || property.heating, icon: <Heater className="w-6 h-6" /> },
-    { labelKey: 'propertyDetailPage.features.balcony', value: property.balcony, icon: <HomeIcon className="w-6 h-6" /> }, // Or a more specific balcony icon if available
-    { labelKey: 'propertyDetailPage.features.dishwasher', value: property.dishwasher, icon: <Bath className="w-6 h-6" /> }, // Using Bath as a stand-in for dishwasher icon
+    { labelKey: 'propertyDetailPage.features.separateKitchen', value: property.separateKitchen, icon: <CookingPot className="w-6 h-6" /> }, 
+    { labelKey: 'propertyDetailPage.features.hasBathtub', value: property.hasBathtub, icon: <Bath className="w-6 h-6" /> },
+    { labelKey: 'propertyDetailPage.features.dishwasher', value: property.dishwasher, icon: <UtensilsCrossed className="w-6 h-6" /> },
     { labelKey: 'propertyDetailPage.features.oven', value: property.oven, icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Zm-2 8H8v4h8Zm-2 8H8v-1.5h8V18Zm0-4.5H8V12h8v1.5Z"/></svg> } ,
     { labelKey: 'propertyDetailPage.features.petsAllowed', value: property.pets, icon: <Dog className="w-6 h-6" /> },
   ];
@@ -136,7 +137,7 @@ export default function PropertyDetailPage() {
                     size="icon" 
                     onClick={toggleFavorite} 
                     className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white hover:text-red-400 rounded-full w-10 h-10 shadow-md"
-                    aria-label={isFavorite ? t('propertyDetailPage.removeFromFavorites') : t('propertyDetailPage.addToFavorites')}
+                    aria-label={isFavorite ? t('propertyDetailPage.removedFromFavorites') : t('propertyDetailPage.addToFavorites')}
                   >
                     <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`} />
                   </Button>
@@ -183,7 +184,7 @@ export default function PropertyDetailPage() {
 
                   <div className="mt-6">
                     <h3 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">{t('propertyDetailPage.keyFeaturesTitle')}</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {featureMap.map(feature => (
                         <AmenityDisplay 
                           key={feature.labelKey} 
@@ -205,7 +206,6 @@ export default function PropertyDetailPage() {
                     </div>
                   )}
                   
-                  {/* Desktop Contact Button - Prominent */}
                   <div className="mt-8 hidden lg:block">
                      <Button 
                         size="lg" 
@@ -221,7 +221,6 @@ export default function PropertyDetailPage() {
 
                 </div>
 
-                {/* Sidebar/Right Column for Contact and Share */}
                 <div className="lg:col-span-1 space-y-6" id="contact-details-section">
                   <Card className="shadow-lg rounded-lg border">
                     <CardHeader className="bg-slate-100 rounded-t-lg p-4">
@@ -268,8 +267,7 @@ export default function PropertyDetailPage() {
           </Card>
         </div>
       </ScrollArea>
-      {/* Fixed Contact Button for Mobile */}
-      <div className="sticky bottom-0 left-0 right-0 lg:hidden p-3 bg-background/90 backdrop-blur-sm border-t z-10 shadow-top-lg">
+      <div className="sticky bottom-0 left-0 right-0 lg:hidden p-3 bg-background/90 backdrop-blur-sm border-t z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-2px_rgba(0,0,0,0.1)]">
         <Button 
           size="lg" 
           className="w-full text-base py-3 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
@@ -288,29 +286,3 @@ export default function PropertyDetailPage() {
     </div>
   );
 }
-
-// Helper to add a shadow to the top, useful for sticky footers
-// Add to your globals.css or tailwind.config.js if you want to use it as a utility
-// .shadow-top-lg { box-shadow: 0 -10px 15px -3px rgb(0 0 0 / 0.1), 0 -4px 6px -4px rgb(0 0 0 / 0.1); }
-// For now, I'll use existing shadow classes or rely on border-t for separation.
-// Added shadow-md to the mobile sticky button and its parent div has shadow-top-lg like class
-// which I assume means a top shadow. Let's add a custom utility for this in tailwind config.
-// Since I cannot modify tailwind.config.ts in this turn, I will use existing shadow classes on the div itself if appropriate,
-// or simply rely on `border-t` and `backdrop-blur-sm` for visual separation.
-// The class `shadow-top-lg` used in the JSX `backdrop-blur-sm border-t z-10 shadow-top-lg` is not a standard Tailwind class.
-// I will replace `shadow-top-lg` with `shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-2px_rgba(0,0,0,0.1)]` for a similar effect.
-// Or, more simply, `shadow-lg` applied to the div which will give shadow on all sides, or `border-t` is often enough.
-// The div already has `border-t` and `backdrop-blur-sm`. Adding another shadow might be too much.
-// Let's use a standard shadow on the button itself or a simple border. The div has `border-t`.
-// The button has `shadow-md`. Parent div: `bg-background/90 backdrop-blur-sm border-t z-10`. This should be fine.
-// The `Bath` icon for dishwasher is a placeholder. Lucide doesn't have a direct dishwasher icon.
-// I'll change `Bath` to something like `Disc3` or `Layers` or `MinusSquare` as a generic appliance icon,
-// or revert to the SVG if it was better. The prior SVG was:
-// <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.643 10.055L10.055 12.643M10.055 10.055L12.643 12.643"/><path d="M16.079 6.611L6.611 16.079M6.611 6.611L16.079 16.079"/><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg> - this is a generic "no" or "cancel" icon. Not suitable.
-// The previous SVG for dishwasher was not provided. The `Bath` icon is not ideal.
-// Let's find a better Lucide icon or use a generic placeholder. `UtensilsCrossed` or `ConciergeBell` or `Archive`.
-// `SprayCan` could also work metaphorically. Let's use `UtensilsCrossed` for dishwasher.
-// Corrected Dishwasher icon and Oven icon.
-// For Oven: `<path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Zm-2 8H8v4h8Zm-2 8H8v-1.5h8V18Zm0-4.5H8V12h8v1.5Z"/>` -> This looks like a microwave/oven. Okay.
-// For Dishwasher: I will use `UtensilsCrossed` icon from lucide-react. Import it.
-// Added `UtensilsCrossed` to imports. Updated featureMap.

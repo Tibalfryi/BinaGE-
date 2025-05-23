@@ -17,12 +17,7 @@
       "onePlusOne": "1+1",
       "twoPlusOne": "2+1",
       "threePlusOne": "3+1",
-      "fourPlusPlus": "4+1+",
-      "any": "Studio / Any",
-      "onePlus": "1+ Room",
-      "twoPlus": "2+ Rooms",
-      "threePlus": "3+ Rooms",
-      "fourPlus": "4+ Rooms"
+      "fourPlusPlus": "4+1+"
     },
     "areaLabel": "Area (m²): ${min} - ${max}",
     "heatingTypeLabel": "Heating Type",
@@ -36,12 +31,12 @@
       "underfloor_heating": "Underfloor Heating",
       "karma": "Karma"
     },
-    "amenitiesLabel": "Amenities",
     "amenitiesOptions": {
-      "balcony": "Balcony",
+      "separateKitchen": "Separate Kitchen",
+      "hasBathtub": "Bathtub",
       "dishwasher": "Dishwasher",
       "oven": "Oven",
-      "petsAllowed": "Pets Allowed"
+      "petsAllowed": "Pets Friendly"
     },
     "resetButton": "Reset Filters",
     "applyButton": "Apply Filters"
@@ -82,10 +77,11 @@
       "area": "Area",
       "floor": "Floor",
       "heating": "Heating",
-      "balcony": "Balcony",
+      "separateKitchen": "Separate Kitchen",
+      "hasBathtub": "Bathtub",
       "dishwasher": "Dishwasher",
       "oven": "Oven",
-      "petsAllowed": "Pets Allowed"
+      "petsAllowed": "Pets Friendly"
     },
     "descriptionTitle": "Description",
     "contactLandlordTitle": "Contact Landlord",

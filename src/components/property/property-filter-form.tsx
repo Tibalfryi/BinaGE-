@@ -34,7 +34,8 @@ const filterSchema = z.object({
   areaMin: z.coerce.number().min(0).optional(),
   areaMax: z.coerce.number().min(0).max(300).optional(), 
   heating: z.array(heatingTypesSchema).optional(),
-  balcony: z.boolean().optional(),
+  separateKitchen: z.boolean().optional(), // Changed from balcony
+  hasBathtub: z.boolean().optional(), // Added
   dishwasher: z.boolean().optional(),
   oven: z.boolean().optional(),
   pets: z.boolean().optional(),
@@ -61,7 +62,8 @@ const defaultFilterValues: PropertyFilters = {
   areaMin: 30, 
   areaMax: 300,
   heating: [],
-  balcony: false,
+  separateKitchen: false, // Changed from balcony
+  hasBathtub: false, // Added
   dishwasher: false,
   oven: false,
   pets: false,
@@ -69,7 +71,7 @@ const defaultFilterValues: PropertyFilters = {
 };
 
 const heatingOptionsForDisplay = [
-  { value: "any", labelKey: "propertyFilterForm.heatingOptions.any" }, // Special "Any" option
+  { value: "any", labelKey: "propertyFilterForm.heatingOptions.any" }, 
   { value: "central", labelKey: "propertyFilterForm.heatingOptions.central" },
   { value: "electric", labelKey: "propertyFilterForm.heatingOptions.electric" },
   { value: "air_conditioner", labelKey: "propertyFilterForm.heatingOptions.air_conditioner" },
@@ -115,6 +117,7 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
       if (name === "areaMin" || name === "areaMax") {
         setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
       }
+      // No need to call onSubmit here if we apply filters manually with a button
     });
     return () => subscription.unsubscribe();
   }, [form, defaultFilterValues.priceMin, defaultFilterValues.priceMax, defaultFilterValues.areaMin, defaultFilterValues.areaMax]);
@@ -129,10 +132,11 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
   ];
 
   const amenities = [
-    { name: "balcony", labelKey: "propertyFilterForm.amenitiesOptions.balcony" },
+    { name: "separateKitchen", labelKey: "propertyFilterForm.amenitiesOptions.separateKitchen" },
+    { name: "hasBathtub", labelKey: "propertyFilterForm.amenitiesOptions.hasBathtub" },
     { name: "dishwasher", labelKey: "propertyFilterForm.amenitiesOptions.dishwasher" },
     { name: "oven", labelKey: "propertyFilterForm.amenitiesOptions.oven" },
-    { name: "pets", labelKey: "propertyFilterForm.amenitiesOptions.petsAllowed" }
+    { name: "pets", labelKey: "propertyFilterForm.amenitiesOptions.petsAllowed" } // Key 'petsAllowed' is fine, translation string will change
   ] as const;
 
 
@@ -252,7 +256,7 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
 
 
         <div className="space-y-2">
-          <FormLabel className="text-base">{t('propertyFilterForm.amenitiesLabel')}</FormLabel>
+          {/* The FormLabel for "Amenities" is removed as requested */}
           {amenities.map(amenity => (
             <FormField
               key={amenity.name}

@@ -1,3 +1,4 @@
+
 // src/app/page.tsx
 "use client";
 
@@ -27,11 +28,12 @@ type SortOrder = 'none' | 'price_asc' | 'price_desc';
 const defaultFilters: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
-  roomsMin: 0, // Default to "Studio / Any" logic initially
+  roomsMin: 0, 
   areaMin: 30,
   areaMax: 300,
   heating: [],
-  balcony: false,
+  separateKitchen: false, // Changed from balcony
+  hasBathtub: false, // Added
   dishwasher: false,
   oven: false,
   pets: false,
@@ -56,11 +58,10 @@ export default function HomePage() {
       if (currentFilters.priceMin !== undefined && prop.price < currentFilters.priceMin) return false;
       if (currentFilters.priceMax !== undefined && prop.price > currentFilters.priceMax) return false;
       
-      // Updated rooms filter logic
       if (currentFilters.roomsMin !== undefined) {
-        if (currentFilters.roomsMin === 0) { // "Studio" selected
-          if (prop.rooms !== 0) return false; // Only show actual studios
-        } else { // "1+1", "2+1", etc. selected
+        if (currentFilters.roomsMin === 0) { 
+          if (prop.rooms !== 0) return false; 
+        } else { 
           if (prop.rooms < currentFilters.roomsMin) return false;
         }
       }
@@ -68,10 +69,13 @@ export default function HomePage() {
       if (currentFilters.areaMin !== undefined && prop.area < currentFilters.areaMin) return false;
       if (currentFilters.areaMax !== undefined && prop.area > currentFilters.areaMax) return false;
       if (currentFilters.heating && currentFilters.heating.length > 0 && !currentFilters.heating.includes(prop.heating)) return false;
-      if (currentFilters.balcony !== undefined && currentFilters.balcony && !prop.balcony) return false;
+      
+      if (currentFilters.separateKitchen !== undefined && currentFilters.separateKitchen && !prop.separateKitchen) return false;
+      if (currentFilters.hasBathtub !== undefined && currentFilters.hasBathtub && !prop.hasBathtub) return false;
       if (currentFilters.dishwasher !== undefined && currentFilters.dishwasher && !prop.dishwasher) return false;
       if (currentFilters.oven !== undefined && currentFilters.oven && !prop.oven) return false;
       if (currentFilters.pets !== undefined && currentFilters.pets && !prop.pets) return false;
+      
       if (currentFilters.searchQuery) {
         const query = currentFilters.searchQuery.toLowerCase();
         const nameMatch = (prop.name || '').toLowerCase().includes(query);
