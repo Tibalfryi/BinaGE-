@@ -22,6 +22,7 @@ export interface Property {
     telegram?: string;
   };
   name?: string; // Optional short name/title for the property
+  // min_rental_period?: 1 | 3 | 6 | 12; // Example: if properties had this field
 }
 
 export interface PropertyFilters {
@@ -37,4 +38,6 @@ export interface PropertyFilters {
   oven?: boolean;
   pets?: boolean;
   searchQuery?: string;
+  rentalTermMin?: 1 | 3 | 6 | 12;
 }
+

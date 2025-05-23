@@ -29,11 +29,12 @@ const defaultFilters: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
   roomsMin: 0, 
+  rentalTermMin: 12,
   areaMin: 30,
   areaMax: 300,
   heating: [],
-  separateKitchen: false, // Changed from balcony
-  hasBathtub: false, // Added
+  separateKitchen: false,
+  hasBathtub: false,
   dishwasher: false,
   oven: false,
   pets: false,
@@ -65,6 +66,12 @@ export default function HomePage() {
           if (prop.rooms < currentFilters.roomsMin) return false;
         }
       }
+
+      // Note: Rental term filter is not applied here as mock properties don't have rental term data.
+      // If properties had a 'min_rental_period' field, you would add a condition like:
+      // if (currentFilters.rentalTermMin !== undefined && prop.min_rental_period && prop.min_rental_period < currentFilters.rentalTermMin) return false;
+      // Or if the filter meant "at least X months", it would be:
+      // if (currentFilters.rentalTermMin !== undefined && prop.available_from_months && prop.available_from_months > currentFilters.rentalTermMin) return false; // This depends on how rentalTermMin is defined
       
       if (currentFilters.areaMin !== undefined && prop.area < currentFilters.areaMin) return false;
       if (currentFilters.areaMax !== undefined && prop.area > currentFilters.areaMax) return false;
@@ -183,3 +190,4 @@ export default function HomePage() {
     </div>
   );
 }
+

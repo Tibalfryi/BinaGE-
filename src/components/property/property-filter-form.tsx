@@ -26,16 +26,18 @@ import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 const heatingTypesSchema = z.enum(['central', 'gas', 'electric', 'none', 'air_conditioner', 'underfloor_heating', 'karma']);
+const rentalTermSchema = z.union([z.literal(1), z.literal(3), z.literal(6), z.literal(12)]);
 
 const filterSchema = z.object({
   priceMin: z.coerce.number().min(0).optional(),
   priceMax: z.coerce.number().min(0).optional(),
   roomsMin: z.coerce.number().min(0).optional(), 
+  rentalTermMin: rentalTermSchema.optional(),
   areaMin: z.coerce.number().min(0).optional(),
   areaMax: z.coerce.number().min(0).max(300).optional(), 
   heating: z.array(heatingTypesSchema).optional(),
-  separateKitchen: z.boolean().optional(), // Changed from balcony
-  hasBathtub: z.boolean().optional(), // Added
+  separateKitchen: z.boolean().optional(),
+  hasBathtub: z.boolean().optional(),
   dishwasher: z.boolean().optional(),
   oven: z.boolean().optional(),
   pets: z.boolean().optional(),
@@ -59,11 +61,12 @@ const defaultFilterValues: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
   roomsMin: 0, 
+  rentalTermMin: 12,
   areaMin: 30, 
   areaMax: 300,
   heating: [],
-  separateKitchen: false, // Changed from balcony
-  hasBathtub: false, // Added
+  separateKitchen: false,
+  hasBathtub: false,
   dishwasher: false,
   oven: false,
   pets: false,
@@ -117,7 +120,6 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
       if (name === "areaMin" || name === "areaMax") {
         setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
       }
-      // No need to call onSubmit here if we apply filters manually with a button
     });
     return () => subscription.unsubscribe();
   }, [form, defaultFilterValues.priceMin, defaultFilterValues.priceMax, defaultFilterValues.areaMin, defaultFilterValues.areaMax]);
@@ -131,12 +133,19 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
     { value: "4", labelKey: "propertyFilterForm.roomsOptions.fourPlusPlus" },
   ];
 
+  const rentalTermOptions = [
+    { value: "12", labelKey: "propertyFilterForm.rentalTermOptions.twelveMonths" },
+    { value: "6", labelKey: "propertyFilterForm.rentalTermOptions.sixMonths" },
+    { value: "3", labelKey: "propertyFilterForm.rentalTermOptions.threeMonths" },
+    { value: "1", labelKey: "propertyFilterForm.rentalTermOptions.oneMonth" },
+  ];
+
   const amenities = [
     { name: "separateKitchen", labelKey: "propertyFilterForm.amenitiesOptions.separateKitchen" },
     { name: "hasBathtub", labelKey: "propertyFilterForm.amenitiesOptions.hasBathtub" },
     { name: "dishwasher", labelKey: "propertyFilterForm.amenitiesOptions.dishwasher" },
     { name: "oven", labelKey: "propertyFilterForm.amenitiesOptions.oven" },
-    { name: "pets", labelKey: "propertyFilterForm.amenitiesOptions.petsAllowed" } // Key 'petsAllowed' is fine, translation string will change
+    { name: "pets", labelKey: "propertyFilterForm.amenitiesOptions.petsAllowed" }
   ] as const;
 
 
@@ -183,6 +192,22 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
                 value={field.value?.toString() ?? "0"}
                 onValueChange={(val) => field.onChange(parseInt(val,10))}
                 options={roomOptions.map(opt => ({ value: opt.value, label: t(opt.labelKey) }))}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="rentalTermMin"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('propertyFilterForm.rentalTermLabel')}</FormLabel>
+              <StyledRadioGroup
+                value={field.value?.toString() ?? "12"}
+                onValueChange={(val) => field.onChange(parseInt(val,10) as PropertyFilters['rentalTermMin'])}
+                options={rentalTermOptions.map(opt => ({ value: opt.value, label: t(opt.labelKey) }))}
               />
               <FormMessage />
             </FormItem>
@@ -256,7 +281,6 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
 
 
         <div className="space-y-2">
-          {/* The FormLabel for "Amenities" is removed as requested */}
           {amenities.map(amenity => (
             <FormField
               key={amenity.name}
@@ -300,9 +324,9 @@ function StyledRadioGroup({ value, onValueChange, options }: StyledRadioGroupPro
     <RadioGroup value={value} onValueChange={onValueChange} className="flex flex-wrap gap-2 pt-1">
       {options.map(option => (
         <div key={option.value}>
-          <RadioGroupItem value={option.value} id={`rooms-${option.value}`} className="sr-only peer" />
+          <RadioGroupItem value={option.value} id={`radio-option-${option.value}-${Math.random().toString(36).substring(7)}`} className="sr-only peer" />
           <Label
-            htmlFor={`rooms-${option.value}`}
+            htmlFor={`radio-option-${option.value}-${Math.random().toString(36).substring(7)}`}
             className="block cursor-pointer rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors"
           >
             {option.label}
@@ -312,3 +336,4 @@ function StyledRadioGroup({ value, onValueChange, options }: StyledRadioGroupPro
     </RadioGroup>
   )
 }
+

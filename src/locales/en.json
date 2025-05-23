@@ -19,6 +19,13 @@
       "threePlusOne": "3+1",
       "fourPlusPlus": "4+1+"
     },
+    "rentalTermLabel": "Rental Term From",
+    "rentalTermOptions": {
+      "oneMonth": "1 month",
+      "threeMonths": "3 months",
+      "sixMonths": "6 months",
+      "twelveMonths": "12 months"
+    },
     "areaLabel": "Area (m²): ${min} - ${max}",
     "heatingTypeLabel": "Heating Type",
     "heatingOptions": {
@@ -95,3 +102,4 @@
     "contactLandlordMobilePrompt": "Contact options are available above. Scroll to view."
   }
 }
+

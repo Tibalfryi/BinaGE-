@@ -19,6 +19,13 @@
       "threePlusOne": "3+1",
       "fourPlusPlus": "4+1+"
     },
+    "rentalTermLabel": "Срок аренды от",
+    "rentalTermOptions": {
+      "oneMonth": "1 месяц",
+      "threeMonths": "3 месяца",
+      "sixMonths": "6 месяцев",
+      "twelveMonths": "12 месяцев"
+    },
     "areaLabel": "Площадь (м²): ${min} - ${max}",
     "heatingTypeLabel": "Тип отопления",
     "heatingOptions": {
@@ -95,3 +102,4 @@
     "contactLandlordMobilePrompt": "Способы связи доступны выше. Прокрутите для просмотра."
   }
 }
+

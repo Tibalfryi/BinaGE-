@@ -19,6 +19,13 @@
       "threePlusOne": "3+1",
       "fourPlusPlus": "4+1+"
     },
+    "rentalTermLabel": "გაქირავების ვადა (დან)",
+    "rentalTermOptions": {
+      "oneMonth": "1 თვე",
+      "threeMonths": "3 თვე",
+      "sixMonths": "6 თვე",
+      "twelveMonths": "12 თვე"
+    },
     "areaLabel": "ფართობი (მ²): ${min} - ${max}",
     "heatingTypeLabel": "გათბობის ტიპი",
     "heatingOptions": {
@@ -95,3 +102,4 @@
     "contactLandlordMobilePrompt": "კონტაქტის ვარიანტები ხელმისაწვდომია ზემოთ. ჩასქროლეთ სანახავად."
   }
 }
+
