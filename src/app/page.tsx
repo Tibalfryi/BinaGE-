@@ -28,8 +28,8 @@ type SortOrder = 'none' | 'price_asc' | 'price_desc';
 const defaultFilters: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
-  roomsMin: 0, 
-  rentalTermMin: 12,
+  roomsMin: [1], 
+  rentalTermMin: [12],
   areaMin: 30,
   areaMax: 300,
   heating: [],
@@ -59,19 +59,23 @@ export default function HomePage() {
       if (currentFilters.priceMin !== undefined && prop.price < currentFilters.priceMin) return false;
       if (currentFilters.priceMax !== undefined && prop.price > currentFilters.priceMax) return false;
       
-      if (currentFilters.roomsMin !== undefined) {
-        if (currentFilters.roomsMin === 0) { 
-          if (prop.rooms !== 0) return false; 
-        } else { 
-          if (prop.rooms < currentFilters.roomsMin) return false;
-        }
+      if (currentFilters.roomsMin && currentFilters.roomsMin.length > 0) {
+        const roomMatch = currentFilters.roomsMin.some(filterRoomCount => {
+          if (filterRoomCount === 0) return prop.rooms === 0; // Studio
+          return prop.rooms === filterRoomCount; // For 1, 2, 3, 4 rooms. If you want "X or more", logic needs adjustment.
+                                                 // Current implementation: exact match for 1,2,3,4.
+                                                 // To match "X or more": return prop.rooms >= filterRoomCount;
+        });
+        if (!roomMatch) return false;
       }
 
-      // Note: Rental term filter is not applied here as mock properties don't have rental term data.
-      // If properties had a 'min_rental_period' field, you would add a condition like:
-      // if (currentFilters.rentalTermMin !== undefined && prop.min_rental_period && prop.min_rental_period < currentFilters.rentalTermMin) return false;
-      // Or if the filter meant "at least X months", it would be:
-      // if (currentFilters.rentalTermMin !== undefined && prop.available_from_months && prop.available_from_months > currentFilters.rentalTermMin) return false; // This depends on how rentalTermMin is defined
+      // Rental term filter:
+      // Note: mock properties don't have rental term data.
+      // If properties had a 'min_rental_period' field, and currentFilters.rentalTermMin is an array:
+      // if (currentFilters.rentalTermMin && currentFilters.rentalTermMin.length > 0) {
+      //   const termMatch = currentFilters.rentalTermMin.some(term => prop.min_rental_period && prop.min_rental_period >= term);
+      //   if (!termMatch) return false;
+      // }
       
       if (currentFilters.areaMin !== undefined && prop.area < currentFilters.areaMin) return false;
       if (currentFilters.areaMax !== undefined && prop.area > currentFilters.areaMax) return false;
@@ -190,4 +194,3 @@ export default function HomePage() {
     </div>
   );
 }
-

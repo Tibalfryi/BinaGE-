@@ -1,3 +1,4 @@
+
 export interface Property {
   id: string;
   address: string;
@@ -28,7 +29,7 @@ export interface Property {
 export interface PropertyFilters {
   priceMin?: number;
   priceMax?: number;
-  roomsMin?: number;
+  roomsMin?: number[]; // Changed from number
   areaMin?: number;
   areaMax?:number;
   heating?: Property['heating'][];
@@ -38,6 +39,5 @@ export interface PropertyFilters {
   oven?: boolean;
   pets?: boolean;
   searchQuery?: string;
-  rentalTermMin?: 1 | 3 | 6 | 12;
+  rentalTermMin?: (1 | 3 | 6 | 12)[]; // Changed from single value
 }
-

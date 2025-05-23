@@ -26,13 +26,13 @@ import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 const heatingTypesSchema = z.enum(['central', 'gas', 'electric', 'none', 'air_conditioner', 'underfloor_heating', 'karma']);
-const rentalTermSchema = z.union([z.literal(1), z.literal(3), z.literal(6), z.literal(12)]);
+const rentalTermValueSchema = z.union([z.literal(1), z.literal(3), z.literal(6), z.literal(12)]);
 
 const filterSchema = z.object({
   priceMin: z.coerce.number().min(0).optional(),
   priceMax: z.coerce.number().min(0).optional(),
-  roomsMin: z.coerce.number().min(0).optional(), 
-  rentalTermMin: rentalTermSchema.optional(),
+  roomsMin: z.array(z.coerce.number().min(0)).optional(), 
+  rentalTermMin: z.array(rentalTermValueSchema).optional(),
   areaMin: z.coerce.number().min(0).optional(),
   areaMax: z.coerce.number().min(0).max(300).optional(), 
   heating: z.array(heatingTypesSchema).optional(),
@@ -60,8 +60,8 @@ interface PropertyFilterFormProps {
 const defaultFilterValues: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
-  roomsMin: 0, 
-  rentalTermMin: 12,
+  roomsMin: [1], // Default to "1+1" selected as per image
+  rentalTermMin: [12], // Default to "12 months" selected
   areaMin: 30, 
   areaMax: 300,
   heating: [],
@@ -120,28 +120,24 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
       if (name === "areaMin" || name === "areaMax") {
         setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
       }
-      // Trigger form submission on any relevant change.
-      // This replaces the explicit "Apply Filters" button functionality for now.
-      // Consider debouncing this if performance becomes an issue.
-      // form.handleSubmit(onSubmit)(); 
     });
     return () => subscription.unsubscribe();
   }, [form, defaultFilterValues.priceMin, defaultFilterValues.priceMax, defaultFilterValues.areaMin, defaultFilterValues.areaMax]);
 
 
-  const roomOptions = [
-    { value: "0", labelKey: "propertyFilterForm.roomsOptions.studio" },
-    { value: "1", labelKey: "propertyFilterForm.roomsOptions.onePlusOne" },
-    { value: "2", labelKey: "propertyFilterForm.roomsOptions.twoPlusOne" },
-    { value: "3", labelKey: "propertyFilterForm.roomsOptions.threePlusOne" },
-    { value: "4", labelKey: "propertyFilterForm.roomsOptions.fourPlusPlus" },
+  const roomOptions: { value: number; labelKey: string }[] = [
+    { value: 0, labelKey: "propertyFilterForm.roomsOptions.studio" },
+    { value: 1, labelKey: "propertyFilterForm.roomsOptions.onePlusOne" },
+    { value: 2, labelKey: "propertyFilterForm.roomsOptions.twoPlusOne" },
+    { value: 3, labelKey: "propertyFilterForm.roomsOptions.threePlusOne" },
+    { value: 4, labelKey: "propertyFilterForm.roomsOptions.fourPlusPlus" },
   ];
 
-  const rentalTermOptions = [
-    { value: "12", labelKey: "propertyFilterForm.rentalTermOptions.twelveMonths" },
-    { value: "6", labelKey: "propertyFilterForm.rentalTermOptions.sixMonths" },
-    { value: "3", labelKey: "propertyFilterForm.rentalTermOptions.threeMonths" },
-    { value: "1", labelKey: "propertyFilterForm.rentalTermOptions.oneMonth" },
+  const rentalTermOptions: { value: 1 | 3 | 6 | 12; labelKey: string }[] = [
+    { value: 12, labelKey: "propertyFilterForm.rentalTermOptions.twelveMonths" },
+    { value: 6, labelKey: "propertyFilterForm.rentalTermOptions.sixMonths" },
+    { value: 3, labelKey: "propertyFilterForm.rentalTermOptions.threeMonths" },
+    { value: 1, labelKey: "propertyFilterForm.rentalTermOptions.oneMonth" },
   ];
 
   const amenities = [
@@ -192,11 +188,32 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t('propertyFilterForm.roomsLabel')}</FormLabel>
-              <StyledRadioGroup
-                value={field.value?.toString() ?? "0"}
-                onValueChange={(val) => field.onChange(parseInt(val,10))}
-                options={roomOptions.map(opt => ({ value: opt.value, label: t(opt.labelKey) }))}
-              />
+              <div className="flex flex-wrap gap-2 pt-1">
+                {roomOptions.map((option) => {
+                  const isChecked = (field.value ?? []).includes(option.value);
+                  return (
+                    <Button
+                      key={option.value}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors",
+                        isChecked && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                      )}
+                      onClick={() => {
+                        const currentValue = field.value ?? [];
+                        const newValue = isChecked
+                          ? currentValue.filter(v => v !== option.value)
+                          : [...currentValue, option.value];
+                        field.onChange(newValue);
+                      }}
+                    >
+                      {t(option.labelKey)}
+                    </Button>
+                  );
+                })}
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -208,11 +225,32 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t('propertyFilterForm.rentalTermLabel')}</FormLabel>
-              <StyledRadioGroup
-                value={field.value?.toString() ?? "12"}
-                onValueChange={(val) => field.onChange(parseInt(val,10) as PropertyFilters['rentalTermMin'])}
-                options={rentalTermOptions.map(opt => ({ value: opt.value, label: t(opt.labelKey) }))}
-              />
+               <div className="flex flex-wrap gap-2 pt-1">
+                {rentalTermOptions.map((option) => {
+                  const isChecked = (field.value ?? []).includes(option.value);
+                  return (
+                    <Button
+                      key={option.value}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors",
+                        isChecked && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                      )}
+                      onClick={() => {
+                        const currentValue = field.value ?? [];
+                        const newValue = isChecked
+                          ? currentValue.filter(v => v !== option.value)
+                          : [...currentValue, option.value];
+                        field.onChange(newValue);
+                      }}
+                    >
+                      {t(option.labelKey)}
+                    </Button>
+                  );
+                })}
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -318,22 +356,22 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
 }
 
 interface StyledRadioGroupProps {
-  value: string;
+  value: string; // This component is no longer used for multi-select, but kept for other potential single-select uses.
   onValueChange: (value: string) => void;
   options: { value: string; label: string }[];
 }
 
 function StyledRadioGroup({ value, onValueChange, options }: StyledRadioGroupProps) {
-  const baseId = React.useId(); // Generate a stable base ID for this group instance
+  const baseId = React.useId();
   return (
     <RadioGroup value={value} onValueChange={onValueChange} className="flex flex-wrap gap-2 pt-1">
       {options.map(option => {
-        const itemId = `${baseId}-${option.value}`; // Create a stable, unique ID for each item
+        const itemId = `${baseId}-${option.value}`;
         return (
           <div key={option.value}>
             <RadioGroupItem value={option.value} id={itemId} className="sr-only peer" />
             <Label
-              htmlFor={itemId} // Use the same stable ID
+              htmlFor={itemId}
               className="block cursor-pointer rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors"
             >
               {option.label}
