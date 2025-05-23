@@ -1,3 +1,4 @@
+
 // @/components/layout/app-header.tsx
 "use client";
 
@@ -10,14 +11,12 @@ import { LanguageSwitcher } from './language-switcher';
 import { useTranslation } from '@/hooks/use-translation';
 
 const Logo = () => (
-  <svg 
-    width="160" 
-    height="120" 
-    viewBox="0 0 190 140" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg" 
+  <svg
+    viewBox="0 0 230 140" // Updated viewBox to accommodate "Batumi" on the right
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
     aria-label="BinaGE Batumi Logo"
-    className="h-10 w-auto" // Adjusted height, width will scale
+    className="h-12 w-auto" // Increased height for a larger logo
   >
     {/* Icon */}
     <defs>
@@ -45,8 +44,8 @@ const Logo = () => (
       BinaGE
     </text>
 
-    {/* Text "Batumi" */}
-    <text x="65" y="135" fontFamily="Arial, Helvetica, sans-serif" fontSize="22" fontWeight="bold" fill="url(#batumiGradient)">
+    {/* Text "Batumi" - Updated position */}
+    <text x="135" y="110" fontFamily="Arial, Helvetica, sans-serif" fontSize="22" fontWeight="bold" fill="url(#batumiGradient)">
       Batumi
     </text>
   </svg>
@@ -88,3 +87,4 @@ export function AppHeader() {
     </header>
   );
 }
+
