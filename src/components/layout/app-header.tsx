@@ -25,13 +25,14 @@ export function AppHeader() {
           <Link href="/" className="flex items-center space-x-2 text-foreground">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 75 32"
-              className="h-7 w-auto"
+              viewBox="0 0 75 32" // Adjusted viewBox to better fit "aipo Gp"
+              className="h-7 w-auto" // Adjusted height if necessary
               aria-label="aipo Gp Logo"
             >
               <style>
                 {`.logo-text { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; font-size: 18px; fill: currentColor; }`}
               </style>
+              {/* Letter 'a' */}
               <text x="2" y="22" className="logo-text">a</text>
               
               {/* 'i' stem */}
@@ -39,13 +40,17 @@ export function AppHeader() {
               {/* 'i' dot (orange house) */}
               <path fill="hsl(var(--primary))" d="M11.25,12 L15.25,12 L15.25,9 L13.25,6.5 L11.25,9 Z" />
               
+              {/* Letter 'p' */}
               <text x="19" y="22" className="logo-text">p</text>
+              {/* Letter 'o' */}
               <text x="29" y="22" className="logo-text">o</text>
               
+              {/* Letter 'G' */}
               <text x="42" y="22" className="logo-text">G</text>
+              {/* Letter 'p' (second p) */}
               <text x="53" y="22" className="logo-text">p</text>
             </svg>
-            <span className="font-bold text-xl"> Lite</span>
+            {/* Removed Lite text here */}
           </Link>
         </div>
 
