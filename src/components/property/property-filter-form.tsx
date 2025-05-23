@@ -120,6 +120,10 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
       if (name === "areaMin" || name === "areaMax") {
         setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
       }
+      // Trigger form submission on any relevant change.
+      // This replaces the explicit "Apply Filters" button functionality for now.
+      // Consider debouncing this if performance becomes an issue.
+      // form.handleSubmit(onSubmit)(); 
     });
     return () => subscription.unsubscribe();
   }, [form, defaultFilterValues.priceMin, defaultFilterValues.priceMax, defaultFilterValues.areaMin, defaultFilterValues.areaMax]);
@@ -320,20 +324,23 @@ interface StyledRadioGroupProps {
 }
 
 function StyledRadioGroup({ value, onValueChange, options }: StyledRadioGroupProps) {
+  const baseId = React.useId(); // Generate a stable base ID for this group instance
   return (
     <RadioGroup value={value} onValueChange={onValueChange} className="flex flex-wrap gap-2 pt-1">
-      {options.map(option => (
-        <div key={option.value}>
-          <RadioGroupItem value={option.value} id={`radio-option-${option.value}-${Math.random().toString(36).substring(7)}`} className="sr-only peer" />
-          <Label
-            htmlFor={`radio-option-${option.value}-${Math.random().toString(36).substring(7)}`}
-            className="block cursor-pointer rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors"
-          >
-            {option.label}
-          </Label>
-        </div>
-      ))}
+      {options.map(option => {
+        const itemId = `${baseId}-${option.value}`; // Create a stable, unique ID for each item
+        return (
+          <div key={option.value}>
+            <RadioGroupItem value={option.value} id={itemId} className="sr-only peer" />
+            <Label
+              htmlFor={itemId} // Use the same stable ID
+              className="block cursor-pointer rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors"
+            >
+              {option.label}
+            </Label>
+          </div>
+        );
+      })}
     </RadioGroup>
-  )
+  );
 }
-
