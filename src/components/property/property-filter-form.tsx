@@ -1,3 +1,4 @@
+
 // @/components/property/property-filter-form.tsx
 "use client";
 
@@ -35,7 +36,7 @@ const filterSchema = z.object({
   priceMax: z.coerce.number().min(0).optional(),
   roomsMin: z.coerce.number().min(0).optional(), 
   areaMin: z.coerce.number().min(0).optional(),
-  areaMax: z.coerce.number().min(0).optional(),
+  areaMax: z.coerce.number().min(0).max(300).optional(), // Max area validation
   heating: z.array(z.enum(heatingOptions.map(h => h.value) as [string, ...string[]])).optional(),
   balcony: z.boolean().optional(),
   dishwasher: z.boolean().optional(),
@@ -43,10 +44,10 @@ const filterSchema = z.object({
   pets: z.boolean().optional(),
   searchQuery: z.string().optional(),
 }).refine(data => !data.priceMin || !data.priceMax || data.priceMax >= data.priceMin, {
-  message: "Max price must be greater than or equal to min price", // This message could also be translated
+  message: "Max price must be greater than or equal to min price",
   path: ["priceMax"],
 }).refine(data => !data.areaMin || !data.areaMax || data.areaMax >= data.areaMin, {
-  message: "Max area must be greater than or equal to min area", // This message could also be translated
+  message: "Max area must be greater than or equal to min area",
   path: ["areaMax"],
 });
 
@@ -61,7 +62,7 @@ const defaultFilterValues: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
   roomsMin: 0,
-  areaMin: 0,
+  areaMin: 300, // Changed default minimum area to 300
   areaMax: 300,
   heating: [],
   balcony: false,
@@ -107,14 +108,9 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
       if (name === 'areaMin' || name === 'areaMax') {
         setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
       }
-      // Automatically submit form on filter change (original behavior)
-      // To apply only on button click, this whole onSubmit(value as FilterFormValues) line would be removed
-      // and handled by the Apply Filters button only.
-      // For now, let's keep auto-submit on change and also have explicit button
-      // onSubmit(value as FilterFormValues); 
     });
     return () => subscription.unsubscribe();
-  }, [form, onFiltersChange]);
+  }, [form]);
 
 
   const roomOptions = [
@@ -296,3 +292,4 @@ function SelectInput({ value, onValueChange, options }: SelectInputProps) {
     </RadioGroup>
   )
 }
+
