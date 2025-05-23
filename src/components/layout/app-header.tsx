@@ -1,3 +1,4 @@
+
 // @/components/layout/app-header.tsx
 "use client";
 
@@ -25,9 +26,9 @@ export function AppHeader() {
           <Link href="/" className="flex items-center space-x-2 text-foreground">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 75 32" // Adjusted viewBox to better fit "aipo Gp"
-              className="h-7 w-auto" // Adjusted height if necessary
-              aria-label="aipo Gp Logo"
+              viewBox="0 0 40 32" // Adjusted viewBox for "aipo"
+              className="h-7 w-auto"
+              aria-label="aipo Logo" // Updated aria-label
             >
               <style>
                 {`.logo-text { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; font-size: 18px; fill: currentColor; }`}
@@ -44,13 +45,7 @@ export function AppHeader() {
               <text x="19" y="22" className="logo-text">p</text>
               {/* Letter 'o' */}
               <text x="29" y="22" className="logo-text">o</text>
-              
-              {/* Letter 'G' */}
-              <text x="42" y="22" className="logo-text">G</text>
-              {/* Letter 'p' (second p) */}
-              <text x="53" y="22" className="logo-text">p</text>
             </svg>
-            {/* Removed Lite text here */}
           </Link>
         </div>
 
@@ -71,3 +66,4 @@ export function AppHeader() {
     </header>
   );
 }
+
