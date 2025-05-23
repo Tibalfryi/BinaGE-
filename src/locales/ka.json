@@ -27,10 +27,14 @@
     "areaLabel": "ფართობი (მ²): ${min} - ${max}",
     "heatingTypeLabel": "გათბობის ტიპი",
     "heatingOptions": {
+      "any": "ნებისმიერი",
       "central": "ცენტრალური",
       "gas": "გაზი",
       "electric": "ელექტრო",
-      "none": "არა"
+      "none": "არა",
+      "air_conditioner": "კონდიციონერი",
+      "underfloor_heating": "იატაკის გათბობა",
+      "karma": "კარმა"
     },
     "amenitiesLabel": "კეთილმოწყობა",
     "amenitiesOptions": {

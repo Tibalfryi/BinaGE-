@@ -27,10 +27,14 @@
     "areaLabel": "Площадь (м²): ${min} - ${max}",
     "heatingTypeLabel": "Тип отопления",
     "heatingOptions": {
+      "any": "Любое",
       "central": "Центральное",
       "gas": "Газовое",
       "electric": "Электрическое",
-      "none": "Нет"
+      "none": "Нет",
+      "air_conditioner": "Кондиционер",
+      "underfloor_heating": "Теплый пол",
+      "karma": "Карма"
     },
     "amenitiesLabel": "Удобства",
     "amenitiesOptions": {

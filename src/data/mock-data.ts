@@ -11,7 +11,7 @@ export const mockProperties: Property[] = [
     rooms: 0, // Studio
     area: 45,
     floor: 10,
-    heating: 'central',
+    heating: 'air_conditioner', // Updated
     pets: true,
     dishwasher: true,
     oven: true,
@@ -34,7 +34,7 @@ export const mockProperties: Property[] = [
     rooms: 2,
     area: 65,
     floor: 3,
-    heating: 'gas',
+    heating: 'underfloor_heating', // Updated
     pets: false,
     dishwasher: true,
     oven: false,
@@ -56,7 +56,7 @@ export const mockProperties: Property[] = [
     rooms: 1,
     area: 80,
     floor: 5,
-    heating: 'electric',
+    heating: 'karma', // Updated
     pets: true,
     dishwasher: false,
     oven: true,
@@ -102,7 +102,7 @@ export const mockProperties: Property[] = [
     rooms: 4,
     area: 150,
     floor: 25,
-    heating: 'central',
+    heating: 'electric', // Updated
     pets: true,
     dishwasher: true,
     oven: true,

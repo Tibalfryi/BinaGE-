@@ -19,17 +19,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import type { PropertyFilters } from "@/types";
+import type { PropertyFilters, Property } from "@/types";
 import React from "react";
 import { RotateCcw } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
+import { cn } from "@/lib/utils";
 
-const heatingOptions = [
-  { value: "central", labelKey: "propertyFilterForm.heatingOptions.central" },
-  { value: "gas", labelKey: "propertyFilterForm.heatingOptions.gas" },
-  { value: "electric", labelKey: "propertyFilterForm.heatingOptions.electric" },
-  { value: "none", labelKey: "propertyFilterForm.heatingOptions.none" },
-] as const;
+const heatingTypesSchema = z.enum(['central', 'gas', 'electric', 'none', 'air_conditioner', 'underfloor_heating', 'karma']);
 
 const filterSchema = z.object({
   priceMin: z.coerce.number().min(0).optional(),
@@ -37,7 +33,7 @@ const filterSchema = z.object({
   roomsMin: z.coerce.number().min(0).optional(), 
   areaMin: z.coerce.number().min(0).optional(),
   areaMax: z.coerce.number().min(0).max(300).optional(), 
-  heating: z.array(z.enum(heatingOptions.map(h => h.value) as [string, ...string[]])).optional(),
+  heating: z.array(heatingTypesSchema).optional(),
   balcony: z.boolean().optional(),
   dishwasher: z.boolean().optional(),
   oven: z.boolean().optional(),
@@ -61,7 +57,7 @@ interface PropertyFilterFormProps {
 const defaultFilterValues: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
-  roomsMin: 0, // Default to "Studio" (value 0)
+  roomsMin: 0, 
   areaMin: 30, 
   areaMax: 300,
   heating: [],
@@ -71,6 +67,16 @@ const defaultFilterValues: PropertyFilters = {
   pets: false,
   searchQuery: "",
 };
+
+const heatingOptionsForDisplay = [
+  { value: "any", labelKey: "propertyFilterForm.heatingOptions.any" }, // Special "Any" option
+  { value: "central", labelKey: "propertyFilterForm.heatingOptions.central" },
+  { value: "electric", labelKey: "propertyFilterForm.heatingOptions.electric" },
+  { value: "air_conditioner", labelKey: "propertyFilterForm.heatingOptions.air_conditioner" },
+  { value: "underfloor_heating", labelKey: "propertyFilterForm.heatingOptions.underfloor_heating" },
+  { value: "karma", labelKey: "propertyFilterForm.heatingOptions.karma" },
+] as const;
+
 
 export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFilterValues }: PropertyFilterFormProps) {
   const { t } = useTranslation();
@@ -102,9 +108,13 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
   };
   
   React.useEffect(() => {
-    const subscription = form.watch((value) => {
-      setCurrentPriceRange([value.priceMin ?? defaultFilterValues.priceMin!, value.priceMax ?? defaultFilterValues.priceMax!]);
-      setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
+    const subscription = form.watch((value, { name }) => {
+      if (name === "priceMin" || name === "priceMax") {
+        setCurrentPriceRange([value.priceMin ?? defaultFilterValues.priceMin!, value.priceMax ?? defaultFilterValues.priceMax!]);
+      }
+      if (name === "areaMin" || name === "areaMax") {
+        setCurrentAreaRange([value.areaMin ?? defaultFilterValues.areaMin!, value.areaMax ?? defaultFilterValues.areaMax!]);
+      }
     });
     return () => subscription.unsubscribe();
   }, [form, defaultFilterValues.priceMin, defaultFilterValues.priceMax, defaultFilterValues.areaMin, defaultFilterValues.areaMax]);
@@ -194,48 +204,52 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
         <FormField
           control={form.control}
           name="heating"
-          render={() => (
+          render={({ field }) => (
             <FormItem>
               <div className="mb-2">
                 <FormLabel className="text-base">{t('propertyFilterForm.heatingTypeLabel')}</FormLabel>
               </div>
-              {heatingOptions.map((item) => (
-                <FormField
-                  key={item.value}
-                  control={form.control}
-                  name="heating"
-                  render={({ field }) => {
-                    return (
-                      <FormItem
-                        key={item.value}
-                        className="flex flex-row items-start space-x-3 space-y-0"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(item.value)}
-                            onCheckedChange={(checked) => {
-                              return checked
-                                ? field.onChange([...(field.value ?? []), item.value])
-                                : field.onChange(
-                                    (field.value ?? []).filter(
-                                      (value) => value !== item.value
-                                    )
-                                  )
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {t(item.labelKey)}
-                        </FormLabel>
-                      </FormItem>
-                    )
-                  }}
-                />
-              ))}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {heatingOptionsForDisplay.map((item) => {
+                  const isAnyButton = item.value === 'any';
+                  const isChecked = isAnyButton 
+                    ? (field.value ?? []).length === 0 
+                    : (field.value ?? []).includes(item.value as Property['heating']);
+
+                  return (
+                    <Button
+                      key={item.value}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors",
+                        isChecked && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                      )}
+                      onClick={() => {
+                        if (isAnyButton) {
+                          field.onChange([]);
+                        } else {
+                          const currentHeating = field.value ?? [];
+                          const optionValue = item.value as Property['heating'];
+                          if (currentHeating.includes(optionValue)) {
+                            field.onChange(currentHeating.filter(h => h !== optionValue));
+                          } else {
+                            field.onChange([...currentHeating, optionValue]);
+                          }
+                        }
+                      }}
+                    >
+                      {t(item.labelKey)}
+                    </Button>
+                  );
+                })}
+              </div>
               <FormMessage />
             </FormItem>
           )}
         />
+
 
         <div className="space-y-2">
           <FormLabel className="text-base">{t('propertyFilterForm.amenitiesLabel')}</FormLabel>

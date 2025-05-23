@@ -27,10 +27,14 @@
     "areaLabel": "Area (m²): ${min} - ${max}",
     "heatingTypeLabel": "Heating Type",
     "heatingOptions": {
+      "any": "Any",
       "central": "Central",
       "gas": "Gas",
       "electric": "Electric",
-      "none": "None"
+      "none": "None",
+      "air_conditioner": "Air Conditioner",
+      "underfloor_heating": "Underfloor Heating",
+      "karma": "Karma"
     },
     "amenitiesLabel": "Amenities",
     "amenitiesOptions": {
