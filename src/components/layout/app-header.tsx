@@ -78,7 +78,7 @@ export function AppHeader() {
                <Menu className="h-6 w-6" />
              </Button>
           )}
-          <Link href="/" aria-label="BinaGE Batumi Home">
+          <Link href="/" aria-label="BinaGE Batumi Home" className="ml-6">
             <Logo />
           </Link>
         </div>
