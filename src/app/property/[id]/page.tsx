@@ -6,16 +6,19 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Property } from '@/types';
-import { mockProperties } from '@/data/mock-data';
+// import { mockProperties } from '@/data/mock-data'; // No longer using mock data
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { 
-  ArrowLeft, BedDouble, Building, DollarSign, Dog, CheckCircle, XCircle, Mail, Phone, Send, Ruler, Heater, Home as HomeIcon, Share2, Heart, MessageCircle, Info, MapPin, DoorOpen, Bath, UtensilsCrossed, CookingPot
-} from 'lucide-react'; // Added MapPin, DoorOpen, Bath, UtensilsCrossed, CookingPot
+  ArrowLeft, BedDouble, Building, DollarSign, Dog, CheckCircle, XCircle, Mail, Phone, Send, Ruler, Heater, Home as HomeIcon, Share2, Heart, MessageCircle, Info, MapPin, DoorOpen, Bath, UtensilsCrossed, CookingPot, Loader2
+} from 'lucide-react';
 import { AppHeader } from '@/components/layout/app-header';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslation } from '@/hooks/use-translation'; 
+import { supabase } from '@/lib/supabase-client';
+import { mapSupabaseToProperty } from '@/lib/supabase-mappers';
+
 
 // Helper to get amenity icon and text
 const AmenityDisplay = ({ label, value, icon, t }: { label: string; value: boolean | string | number; icon: React.ReactNode; t: (key: string) => string }) => (
@@ -35,23 +38,60 @@ export default function PropertyDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const [property, setProperty] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const { t } = useTranslation(); 
 
   useEffect(() => {
     if (id) {
-      const foundProperty = mockProperties.find(p => p.id === id);
-      setProperty(foundProperty || null);
-      if (foundProperty) {
-        setIsFavorite(foundProperty.is_favorite || false);
-        document.title = `${foundProperty.name || foundProperty.address} - ${t('propertyDetailPage.rentInBatumi')} | BinaGE Lite`;
-      } else {
-         document.title = `${t('propertyDetailPage.propertyNotFound')} | BinaGE Lite`;
-      }
+      const fetchPropertyDetails = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('BinaGE')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error(`Error fetching property ${id} from Supabase:`, error);
+          setProperty(null);
+        } else if (data) {
+          const mappedProperty = mapSupabaseToProperty(data); // No index needed for single item
+          if (mappedProperty) {
+            setProperty(mappedProperty);
+            setIsFavorite(mappedProperty.is_favorite || false);
+            document.title = `${mappedProperty.name || mappedProperty.address} - ${t('propertyDetailPage.rentInBatumi')} | BinaGE`;
+          } else {
+            console.warn(`Property ${id} could not be mapped or was invalid.`);
+            setProperty(null);
+            document.title = `${t('propertyDetailPage.propertyNotFound')} | BinaGE`;
+          }
+        } else {
+          setProperty(null); // No data found for this ID
+          document.title = `${t('propertyDetailPage.propertyNotFound')} | BinaGE`;
+        }
+        setIsLoading(false);
+      };
+      fetchPropertyDetails();
+    } else {
+      setIsLoading(false);
+      setProperty(null);
+      document.title = `${t('propertyDetailPage.propertyNotFound')} | BinaGE`;
     }
   }, [id, t]);
   
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <AppHeader />
+        <div className="flex-grow flex flex-col items-center justify-center text-center p-8">
+          <Loader2 className="w-16 h-16 text-primary animate-spin mb-4" />
+          <h2 className="text-2xl font-semibold mb-2">Loading Property...</h2>
+        </div>
+      </div>
+    );
+  }
 
   if (!property) {
     return (
@@ -74,6 +114,7 @@ export default function PropertyDetailPage() {
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
+    // Here you would typically also update the backend (e.g., Supabase)
     alert(isFavorite ? t('propertyDetailPage.removedFromFavorites') : t('propertyDetailPage.addedToFavorites'));
   };
 
@@ -227,28 +268,28 @@ export default function PropertyDetailPage() {
                       <CardTitle className="text-lg text-center text-gray-700">{t('propertyDetailPage.contactOptionsTitle')}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 space-y-3">
-                      {property.owner_contact.email && (
+                      {property.owner_contact?.email && (
                         <Button variant="outline" className="w-full justify-center py-3 text-base border-gray-300 hover:border-primary hover:bg-primary/5" asChild>
                           <a href={`mailto:${property.owner_contact.email}`} className="flex items-center gap-2">
                             <Mail className="h-5 w-5 text-primary" /> {t('propertyDetailPage.contact.email')}
                           </a>
                         </Button>
                       )}
-                      {property.owner_contact.phone && (
+                      {property.owner_contact?.phone && (
                         <Button variant="outline" className="w-full justify-center py-3 text-base border-gray-300 hover:border-primary hover:bg-primary/5" asChild>
                           <a href={`tel:${property.owner_contact.phone}`} className="flex items-center gap-2">
                            <Phone className="h-5 w-5 text-primary" /> {t('propertyDetailPage.contact.call')}
                           </a>
                         </Button>
                       )}
-                      {property.owner_contact.telegram && (
+                      {property.owner_contact?.telegram && (
                         <Button variant="outline" className="w-full justify-center py-3 text-base border-gray-300 hover:border-primary hover:bg-primary/5" asChild>
-                          <a href={`https://t.me/${property.owner_contact.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                          <a href={`https://t.me/${String(property.owner_contact.telegram).replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                             <Send className="h-5 w-5 text-primary" /> Telegram
                           </a>
                         </Button>
                       )}
-                       {!property.owner_contact.email && !property.owner_contact.phone && !property.owner_contact.telegram && (
+                       {!(property.owner_contact?.email || property.owner_contact?.phone || property.owner_contact?.telegram) && (
                          <p className="text-sm text-center text-muted-foreground py-4">{t('propertyDetailPage.contact.notProvided')}</p>
                        )}
                     </CardContent>
@@ -286,3 +327,4 @@ export default function PropertyDetailPage() {
     </div>
   );
 }
+

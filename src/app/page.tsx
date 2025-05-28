@@ -10,7 +10,7 @@ import { PropertyListView } from '@/components/property/property-list-view';
 import { Button } from '@/components/ui/button';
 import { MapIcon, ListIcon, Loader2, ArrowDownNarrowWide, ArrowUpNarrowWide } from 'lucide-react';
 import type { Property, PropertyFilters } from '@/types';
-import { mockProperties } from '@/data/mock-data';
+// import { mockProperties } from '@/data/mock-data'; // No longer using mock data
 import { SidebarInset } from '@/components/ui/sidebar';
 import {
   Select,
@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from '@/hooks/use-translation';
+import { supabase } from '@/lib/supabase-client';
+import { mapSupabaseToProperty } from '@/lib/supabase-mappers';
 
 
 type ViewMode = 'map' | 'list';
@@ -28,7 +30,7 @@ type SortOrder = 'none' | 'price_asc' | 'price_desc';
 const defaultFilters: PropertyFilters = {
   priceMin: 0,
   priceMax: 5000,
-  roomsMin: [1], 
+  roomsMin: [1],
   rentalTermMin: [12],
   areaMin: 30,
   areaMax: 300,
@@ -51,7 +53,30 @@ export default function HomePage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    setProperties(mockProperties);
+    const fetchProperties = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase.from('BinaGE').select('*');
+
+      if (error) {
+        console.error('Error fetching properties from Supabase:', error);
+        setProperties([]);
+        setFilteredProperties([]);
+      } else if (data) {
+        const mappedData = data
+          .map((item, idx) => mapSupabaseToProperty(item, idx))
+          .filter((p): p is Property => p !== null); // Type guard to ensure array of Property
+
+        if (data.length > 0 && mappedData.length < data.length) {
+          console.warn(`${data.length - mappedData.length} properties were skipped during mapping due to invalid data. Check previous warnings in console.`);
+        }
+        setProperties(mappedData);
+      } else {
+        setProperties([]); // No data from Supabase
+      }
+      setIsLoading(false);
+    };
+
+    fetchProperties();
   }, []);
 
   const applyFiltersAndSorting = useCallback((allProps: Property[], currentFilters: PropertyFilters, currentSortOrder: SortOrder): Property[] => {
@@ -62,23 +87,14 @@ export default function HomePage() {
       if (currentFilters.roomsMin && currentFilters.roomsMin.length > 0) {
         const roomMatch = currentFilters.roomsMin.some(filterRoomCount => {
           if (filterRoomCount === 0) return prop.rooms === 0; // Studio
-          return prop.rooms === filterRoomCount; // For 1, 2, 3, 4 rooms. If you want "X or more", logic needs adjustment.
-                                                 // Current implementation: exact match for 1,2,3,4.
-                                                 // To match "X or more": return prop.rooms >= filterRoomCount;
+          return prop.rooms === filterRoomCount;
         });
         if (!roomMatch) return false;
       }
-
-      // Rental term filter:
-      // Note: mock properties don't have rental term data.
-      // If properties had a 'min_rental_period' field, and currentFilters.rentalTermMin is an array:
-      // if (currentFilters.rentalTermMin && currentFilters.rentalTermMin.length > 0) {
-      //   const termMatch = currentFilters.rentalTermMin.some(term => prop.min_rental_period && prop.min_rental_period >= term);
-      //   if (!termMatch) return false;
-      // }
       
       if (currentFilters.areaMin !== undefined && prop.area < currentFilters.areaMin) return false;
       if (currentFilters.areaMax !== undefined && prop.area > currentFilters.areaMax) return false;
+      
       if (currentFilters.heating && currentFilters.heating.length > 0 && !currentFilters.heating.includes(prop.heating)) return false;
       
       if (currentFilters.separateKitchen !== undefined && currentFilters.separateKitchen && !prop.separateKitchen) return false;
@@ -91,7 +107,7 @@ export default function HomePage() {
         const query = currentFilters.searchQuery.toLowerCase();
         const nameMatch = (prop.name || '').toLowerCase().includes(query);
         const addressMatch = prop.address.toLowerCase().includes(query);
-        const descriptionMatch = prop.description.toLowerCase().includes(query);
+        const descriptionMatch = (prop.description || '').toLowerCase().includes(query);
         if (!nameMatch && !addressMatch && !descriptionMatch) {
           return false;
         }
@@ -109,12 +125,15 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    setIsLoading(true);
+    // No need to set isLoading here as the initial fetch handles it.
+    // This effect primarily reacts to changes in properties, filters, or sortOrder.
     const timer = setTimeout(() => {
+      setIsLoading(true); // Set loading true before starting filtering/sorting
       const newFilteredSortedProperties = applyFiltersAndSorting(properties, filters, sortOrder);
       setFilteredProperties(newFilteredSortedProperties);
-      setIsLoading(false);
-    }, 300); 
+      setIsLoading(false); // Set loading false after filtering/sorting is done
+    }, 50); // Reduced delay for quicker updates, can be adjusted
+    
     return () => clearTimeout(timer);
   }, [properties, filters, sortOrder, applyFiltersAndSorting]);
 
@@ -194,3 +213,4 @@ export default function HomePage() {
     </div>
   );
 }
+
