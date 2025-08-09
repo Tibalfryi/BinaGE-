@@ -1,0 +1,27 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+
+      # Сборка Next.js и экспорт в статический сайт
+      - run: npx next build
+      - run: npx next export -o out
+
+      # Деплой на Firebase Hosting
+      - run: npm i -g firebase-tools
+      - run: firebase deploy --only hosting --project binage-lite
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
