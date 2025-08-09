@@ -1,51 +1,45 @@
-name: deploy
+name: Deploy to Firebase Hosting
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # <<<<< ВАЖНО: прокидываем секреты в окружение джобы
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} # если используешь
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
     steps:
-      - name: Set up job
-        run: echo "Starting deployment..."
-
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Verify required env
         run: |
           [ -n "$NEXT_PUBLIC_SUPABASE_URL" ] || { echo "NEXT_PUBLIC_SUPABASE_URL is missing"; exit 1; }
-          [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] || { echo "NEXT_PUBLIC_SUPABASE_ANON_KEY is missing"; exit 1; }
+          echo "NEXT_PUBLIC_SUPABASE_URL is set ✅"
 
       - name: Build Next.js
         run: npm run build
 
       - name: Export static site
-        run: npx next export --outdir=out
+        run: npx next export   # без -o
 
       - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+        run: npm i -g firebase-tools
 
       - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
-
-      - name: Post Setup Node.js
-        run: echo "Post Node.js setup"
-
-      - name: Post Checkout
-        run: echo "Post checkout"
-
-      - name: Complete job
-        run: echo "Deployment completed successfully!"
+        run: firebase deploy --only hosting --project binage-lite
