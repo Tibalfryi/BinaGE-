@@ -1,4 +1,5 @@
 name: Deploy to Firebase Hosting
+
 on:
   push:
     branches: [ main ]
@@ -6,26 +7,46 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+    env:
+      # Передаются в билд из GitHub Secrets
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
           cache: 'npm'
 
-      - run: npm install
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
-      # Сборка Next.js и экспорт в статический сайт
-      - run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
-      - run: npx next export -o out
+      # В проекте используется OpenTelemetry и во время билда ищется пакет exporter-jaeger.
+      # Ставим его без сохранения в package.json, чтобы билд в CI не падал.
+      - name: Ensure Jaeger exporter is available
+        run: npm install --no-save @opentelemetry/exporter-jaeger
 
-      # Деплой на Firebase Hosting
-      - run: npm i -g firebase-tools
-      - run: firebase deploy --only hosting --project binage-lite
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Export static site
+        run: npx next export -o out
+
+      - name: Install Firebase CLI
+        run: npm i -g firebase-tools
+
+      - name: Deploy to Firebase Hosting
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-
+        # Замените binage-lite на ID вашего проекта в Firebase, если он другой
+        run: firebase deploy --only hosting --project binage-lite
