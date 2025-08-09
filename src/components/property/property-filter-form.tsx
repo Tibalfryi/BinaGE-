@@ -90,7 +90,8 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
     defaultValues: initialFilters,
   });
 
-  const [currentPriceRange, setCurrentPriceRange] = React.useState<[number, number]>([
+  const [currentPriceRange, setCurrentPriceRange] = useState<[number, number]>([0, 5000]);
+
     initialFilters?.priceMin ?? defaultFilterValues.priceMin!,
     initialFilters?.priceMax ?? defaultFilterValues.priceMax!,
   ]);
@@ -172,12 +173,14 @@ export function PropertyFilterForm({ onFiltersChange, initialFilters = defaultFi
             value={currentPriceRange} 
             min={0}
             max={5000}
-            step={50} 
-            onValueChange={(value) => {
-              setCurrentPriceRange(value); 
-              form.setValue("priceMin", value[0], { shouldDirty: true });
-              form.setValue("priceMax", value[1], { shouldDirty: true });
-            }}
+            step={50}
+onValueChange={(val: number[]) => {
+  const [min, max] = val as [number, number];
+  setCurrentPriceRange([min, max]);
+  form.setValue("priceMin", min, { shouldDirty: true });
+  form.setValue("priceMax", max, { shouldDirty: true });
+}}
+
             className="py-2"
           />
         </FormItem>
