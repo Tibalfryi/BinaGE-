@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Firebase Hosting (SSR)
 
 on:
   push:
@@ -8,39 +8,33 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # <— вот здесь прокидываем env из GitHub Secrets
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install deps
         run: npm ci
 
-      # Необязательно, но удобно: явная проверка, чтобы упасть с понятной ошибкой
-      - name: Verify required env
-        run: |
-          [ -n "$NEXT_PUBLIC_SUPABASE_URL" ] || { echo "NEXT_PUBLIC_SUPABASE_URL is missing"; exit 1; }
-          [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] || { echo "NEXT_PUBLIC_SUPABASE_ANON_KEY is missing"; exit 1; }
-
-      - name: Build Next.js
+      - name: Build (Next.js)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
-
-      - name: Export static site
-        run: npx next export
 
       - name: Install Firebase CLI
         run: npm i -g firebase-tools
 
-      - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --project binage-lite
+      - name: Enable Firebase webframeworks
+        run: firebase experiments:enable webframeworks
+
+      # ВАЖНО: подставь свой Project ID, тот же что ты уже используешь (у тебя ранее был "binage-lite")
+      - name: Deploy to Firebase Hosting (SSR)
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --only hosting --project binage-lite
