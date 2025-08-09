@@ -1,13 +1,17 @@
 // @/hooks/use-translation.ts
 "use client";
 
-import { useLanguage } from '@/context/language-context';
-import en from '@/locales/en.json';
-import ru from '@/locales/ru.json';
-import ka from '@/locales/ka.json';
+import { useLanguage } from "@/context/language-context";
+import en from "@/locales/en.json";
+import ru from "@/locales/ru.json";
+import ka from "@/locales/ka.json";
 
-// Define a type for your translations
-type Translations = Record<string, Record<string, string>>;
+/**
+ * Рекурсивный тип для сообщений: позволяет иметь вложенные объекты
+ * (appHeader.aiAssistant и т.п.)
+ */
+type Messages = { [key: string]: string | Messages };
+type Translations = Record<string, Messages>;
 
 const translations: Translations = {
   en,
@@ -15,27 +19,37 @@ const translations: Translations = {
   ka,
 };
 
-// Helper function to access nested keys like "group.key"
-const getNestedValue = (obj: Record<string, any>, path: string): string | undefined => {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj) as string | undefined;
+/**
+ * Достаёт значение по пути вида "group.sub.key".
+ * Возвращает строку или undefined, если не найдено.
+ */
+const getNestedValue = (obj: Messages, path: string): string | undefined => {
+  let curr: string | Messages | undefined = obj;
+  for (const part of path.split(".")) {
+    if (curr && typeof curr === "object" && part in curr) {
+      curr = (curr as Messages)[part];
+    } else {
+      curr = undefined;
+      break;
+    }
+  }
+  return typeof curr === "string" ? curr : undefined;
 };
-
 
 export const useTranslation = () => {
   const { language } = useLanguage();
 
   const t = (key: string, params?: Record<string, string | number>): string => {
-    const langTranslations = translations[language] || translations['en'];
-    let translatedString = getNestedValue(langTranslations, key) || key;
+    const langTranslations = translations[language] || translations["en"];
+    let translated = getNestedValue(langTranslations, key) || key;
 
     if (params) {
-      Object.keys(params).forEach(paramKey => {
-        const regex = new RegExp(`\\$\\{${paramKey}\\}`, 'g');
-        translatedString = translatedString.replace(regex, String(params[paramKey]));
-      });
+      for (const [pKey, pVal] of Object.entries(params)) {
+        const re = new RegExp(`\\$\\{${pKey}\\}`, "g");
+        translated = translated.replace(re, String(pVal));
+      }
     }
-    
-    return translatedString;
+    return translated;
   };
 
   return { t, currentLanguage: language };
