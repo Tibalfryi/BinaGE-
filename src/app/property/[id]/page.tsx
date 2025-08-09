@@ -1,9 +1,30 @@
 // src/app/property/[id]/page.tsx
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+);
+
+// Запрещаем динамическую генерацию — строим статический export
+export const dynamic = 'error';
+export const dynamicParams = false;
+// Опционально: обновлять кэш раз в 10 минут
+export const revalidate = 600;
+
+// Для output:'export' нужно заранее сообщить все id для маршрута /property/[id]
+export async function generateStaticParams() {
+  const { data, error } = await supabase
+    .from('BinaGE')     // ← проверь название таблицы
+    .select('id')
+    .limit(10000);
+
+  if (error || !data) return [];
+
+  return data
+    .filter((r) => r && r.id !== null && r.id !== undefined)
+    .map((r) => ({ id: String(r.id) }));
+}
 
 type Property = {
   id: number;
@@ -16,48 +37,26 @@ type Property = {
   // добавь нужные поля по своей БД
 };
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+async function getPropertyById(id: string): Promise<Property | null> {
+  const numericId = Number(id);
+  if (Number.isNaN(numericId)) return null;
 
-export default function PropertyPage() {
-  const params = useParams<{ id: string }>();
-  const [data, setData] = useState<Property | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [errorText, setErrorText] = useState<string | null>(null);
+  const { data, error } = await supabase
+    .from('BinaGE')     // ← проверь название таблицы
+    .select('*')
+    .eq('id', numericId)
+    .single();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        setErrorText(null);
+  if (error) return null;
+  return data as Property;
+}
 
-        // id из URL всегда строка → приводим к числу
-        const numericId = Number(params.id);
-        if (Number.isNaN(numericId)) {
-          throw new Error('Некорректный ID объявления');
-        }
+export default async function PropertyPage({ params }: { params: { id: string } }) {
+  const data = await getPropertyById(params.id);
 
-        const { data, error } = await supabase
-          .from('BinaGE')
-          .select('*')
-          .eq('id', numericId)   // ← фикс: число, а не строка
-          .single();
-
-        if (error) throw error;
-        setData(data as Property);
-      } catch (e: any) {
-        setErrorText(e.message ?? 'Ошибка загрузки');
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [params.id]);
-
-  if (loading) return <div className="p-4">Загрузка…</div>;
-  if (errorText) return <div className="p-4 text-red-600">Ошибка: {errorText}</div>;
-  if (!data) return <div className="p-4">Объявление не найдено</div>;
+  if (!data) {
+    return <div className="p-4">Объявление не найдено</div>;
+  }
 
   return (
     <div className="p-4 space-y-4">
@@ -73,4 +72,3 @@ export default function PropertyPage() {
     </div>
   );
 }
-
