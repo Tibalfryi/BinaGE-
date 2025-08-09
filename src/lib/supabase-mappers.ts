@@ -1,18 +1,11 @@
 // src/lib/supabase-mappers.ts
 import type { Property } from '@/types';
 
-// Разрешённые значения для heating
-type HeatingType =
-  | 'central'
-  | 'gas'
-  | 'electric'
-  | 'none'
-  | 'air_conditioner'
-  | 'underfloor_heating'
-  | 'karma';
+// Берём точный union-тип из модели Property
+type HeatingType = NonNullable<Property['heating']>;
 
-// Маппинг из кода в русский текст
-const heatingTypeMap: Record<HeatingType, string> = {
+// Карта: код -> русская подпись (используй в UI при показе)
+export const heatingLabelMap: Record<HeatingType, string> = {
   central: 'Центральное',
   gas: 'Газовое',
   electric: 'Электрическое',
@@ -22,8 +15,14 @@ const heatingTypeMap: Record<HeatingType, string> = {
   karma: 'Карма',
 };
 
+// type guard, что строка — валидный HeatingType
+const isHeatingType = (v: string): v is HeatingType => {
+  return (v as HeatingType) in heatingLabelMap;
+};
+
 export const mapSupabaseToProperty = (supabaseItem: any, index?: number): Property | null => {
   try {
+    // Проверки ID
     if (!supabaseItem || supabaseItem.id === null || supabaseItem.id === undefined) {
       console.warn(
         `Property data is invalid or missing ID${index !== undefined ? ` at index ${index}` : ''}. Skipping.`,
@@ -44,41 +43,34 @@ export const mapSupabaseToProperty = (supabaseItem: any, index?: number): Proper
       return null;
     }
 
-    // Обработка фото
+    // Фото
     const photoUrlsRaw = supabaseItem.photo_urls;
-    let photoUrls: string[] = [];
+    let photo_urls: string[] = [];
     if (Array.isArray(photoUrlsRaw)) {
-      photoUrls = photoUrlsRaw.reduce((acc: string[], url: any) => {
-        if (typeof url === 'string' && url.trim().startsWith('http')) {
-          acc.push(url.trim());
-        }
+      photo_urls = photoUrlsRaw.reduce((acc: string[], url: any) => {
+        if (typeof url === 'string' && url.trim().startsWith('http')) acc.push(url.trim());
         return acc;
       }, []);
     } else if (typeof photoUrlsRaw === 'string' && photoUrlsRaw.trim().startsWith('http')) {
-      photoUrls = [photoUrlsRaw.trim()];
+      photo_urls = [photoUrlsRaw.trim()];
     }
 
     // Контакты владельца
-    let ownerContact = {};
+    let owner_contact: Record<string, unknown> = {};
     if (typeof supabaseItem.owner_contact === 'object' && supabaseItem.owner_contact !== null) {
-      ownerContact = supabaseItem.owner_contact;
+      owner_contact = supabaseItem.owner_contact;
     } else if (typeof supabaseItem.owner_contact === 'string') {
       try {
         const parsed = JSON.parse(supabaseItem.owner_contact);
-        if (typeof parsed === 'object' && parsed !== null) {
-          ownerContact = parsed;
-        }
+        if (typeof parsed === 'object' && parsed !== null) owner_contact = parsed;
       } catch {
-        ownerContact = {};
+        owner_contact = {};
       }
     }
 
-    // Определяем значение отопления сразу на русском
+    // Нормализуем heating к union-типу; по умолчанию 'none'
     const rawHeating = String(supabaseItem.heating ?? '').trim().toLowerCase();
-    const heatingText =
-      (Object.keys(heatingTypeMap) as HeatingType[]).includes(rawHeating as HeatingType)
-        ? heatingTypeMap[rawHeating as HeatingType]
-        : heatingTypeMap.none;
+    const heating: HeatingType = isHeatingType(rawHeating) ? rawHeating : 'none';
 
     return {
       id: String(supabaseItem.id),
@@ -93,16 +85,16 @@ export const mapSupabaseToProperty = (supabaseItem: any, index?: number): Proper
           : Number(supabaseItem.rooms),
       area: Number(supabaseItem.area) || 0,
       floor: Number(supabaseItem.floor) || 0,
-      heating: heatingText, // сразу русский текст
+      heating, // <-- union-значение, строго по типу Property['heating']
       pets: supabaseItem.pets === true,
       dishwasher: supabaseItem.dishwasher === true,
       oven: supabaseItem.oven === true,
       separateKitchen: supabaseItem.separateKitchen === true,
       hasBathtub: supabaseItem.hasBathtub === true,
-      photo_urls: photoUrls,
+      photo_urls,
       description: supabaseItem.description || '',
       is_favorite: supabaseItem.is_favorite === true,
-      owner_contact: ownerContact,
+      owner_contact,
     };
   } catch (e) {
     console.error(
