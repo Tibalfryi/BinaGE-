@@ -1,14 +1,10 @@
 // @/components/map/google-map-view.tsx
 "use client";
-
-import React, { useState } from 'react';
-import { Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps';
-import type { Property } from '@/types';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, Home, Ruler } from 'lucide-react';
+import React, { useState } from "react";
+import { Map, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
+import PropertyDetailsCard from "@/components/property/property-details-card";
+import type { Property } from "@/types";
+import PropertyDetailsModal from '@/components/ui/PropertyDetailsModal';
 
 interface GoogleMapViewProps {
   properties: Property[];
@@ -19,15 +15,19 @@ interface GoogleMapViewProps {
 const BatumiCenter = { lat: 41.6464, lng: 41.6327 }; // Approx center of Batumi
 
 const getPinStyle = (price: number): { background: string; glyphColor: string; borderColor: string } => {
-  const glyphColor = 'hsl(var(--pin-glyph-color))';
-  const borderColor = 'hsl(var(--pin-border-color))';
+  const glyphColor = "hsl(var(--pin-glyph-color))";
+  const borderColor = "hsl(var(--pin-border-color))";
 
   if (price < 500) {
-    return { background: 'hsl(var(--pin-color-blue))', glyphColor, borderColor };
+    return { background: "hsl(var(--pin-color-blue))", glyphColor, borderColor };
   } else if (price <= 1000) {
-    return { background: 'hsl(var(--pin-color-green))', glyphColor, borderColor };
+    return { background: "hsl(var(--pin-color-green))", glyphColor, borderColor };
   } else {
-    return { background: 'hsl(var(--primary))', glyphColor: 'hsl(var(--primary-foreground))', borderColor: 'hsl(var(--primary-foreground))' };
+    return {
+      background: "hsl(var(--primary))",
+      glyphColor: "hsl(var(--primary-foreground))",
+      borderColor: "hsl(var(--primary-foreground))",
+    };
   }
 };
 
@@ -38,23 +38,29 @@ export function GoogleMapView({
 }: GoogleMapViewProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
+  const handleMarkerClick = (property: Property) => {
+    setSelectedProperty(property);
+  };
+
+  const closeModal = () => setSelectedProperty(null);
+
   return (
     <div className="h-full w-full min-h-[calc(100vh-10rem)] rounded-lg overflow-hidden shadow-lg">
       <Map
         defaultCenter={defaultCenter}
         defaultZoom={defaultZoom}
-        gestureHandling={'greedy'}
+        gestureHandling="greedy"
         disableDefaultUI={true}
-        mapId="binageLiteMap" // Optional: for custom styling in Google Cloud Console
+        mapId="binageLiteMap"
         className="h-full w-full"
       >
-        {properties.map((property) => {
+        {properties.map((property: Property) => {
           const pinStyle = getPinStyle(property.price);
           return (
             <AdvancedMarker
               key={property.id}
               position={{ lat: property.lat, lng: property.lng }}
-              onClick={() => setSelectedProperty(property)}
+              onClick={() => handleMarkerClick(property)}
               title={property.name || property.address}
             >
               <Pin
@@ -67,56 +73,13 @@ export function GoogleMapView({
             </AdvancedMarker>
           );
         })}
-
-        {selectedProperty && (
-          <InfoWindow
-            position={{ lat: selectedProperty.lat, lng: selectedProperty.lng }}
-            onCloseClick={() => setSelectedProperty(null)}
-            pixelOffset={[0,-40]}
-          >
-            <Card className="w-72 shadow-xl rounded-lg overflow-hidden">
-              <CardHeader className="p-0">
-                {selectedProperty.photo_urls[0] && (
-                  <Image
-                    src={selectedProperty.photo_urls[0]}
-                    alt={selectedProperty.name || selectedProperty.address}
-                    width={300}
-                    height={150}
-                    className="object-cover w-full h-36"
-                    data-ai-hint="apartment interior"
-                  />
-                )}
-                <div className="p-3">
-                  <CardTitle className="text-base font-semibold truncate">
-                    {selectedProperty.name || selectedProperty.address}
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 text-sm space-y-1">
-                <div className="flex items-center gap-2 text-primary">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="font-bold text-lg">{selectedProperty.price} USD</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Home className="h-4 w-4" />
-                  <span>{selectedProperty.rooms === 0 ? 'Studio' : `${selectedProperty.rooms} rooms`}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Ruler className="h-4 w-4" />
-                  <span>{selectedProperty.area} m²</span>
-                </div>
-              </CardContent>
-              <CardFooter className="p-3">
-                <Link href={`/property/${selectedProperty.id}`} passHref legacyBehavior>
-                  <Button asChild size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                    <a>View Details</a>
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          </InfoWindow>
-        )}
       </Map>
+
+      <PropertyDetailsModal open={!!selectedProperty} onClose={closeModal}>
+        {selectedProperty && (
+          <PropertyDetailsCard property={selectedProperty} onClose={closeModal} />
+        )}
+      </PropertyDetailsModal>
     </div>
   );
 }
