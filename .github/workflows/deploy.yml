@@ -3,6 +3,7 @@ name: Deploy to Firebase Hosting (SSR)
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -15,27 +16,28 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
 
       - name: Install deps
         run: npm ci
 
       - name: Build (Next.js)
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
+
+      # Пишем JSON ключ во временный файл и прокидываем путь в env
+      - name: Configure GCP credentials for Firebase CLI
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${RUNNER_TEMP}/gcp.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${RUNNER_TEMP}/gcp.json" >> "$GITHUB_ENV"
 
       - name: Install Firebase CLI
         run: npm i -g firebase-tools
 
-      - name: Enable Firebase webframeworks
-        run: firebase experiments:enable webframeworks
+      - name: Enable Firebase webframeworks (once ok if enabled)
+        run: npx firebase experiments:enable webframeworks
 
-      # ВАЖНО: подставь свой Project ID, тот же что ты уже используешь (у тебя ранее был "binage-lite")
       - name: Deploy to Firebase Hosting (SSR)
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: firebase deploy --only hosting --project binage-lite
- 
+        run: |
+          npx firebase deploy \
+            --only hosting \
+            --project "${{ secrets.FIREBASE_PROJECT_ID }}"
