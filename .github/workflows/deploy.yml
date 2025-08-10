@@ -2,53 +2,57 @@ name: Deploy to Firebase Hosting
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      # Supabase для билда Next.js
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      # Firebase/GCP
-      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-      FIREBASE_SITE: ${{ secrets.FIREBASE_SITE }} # можно удалить, если не нужен
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 18
+          cache: npm
 
       - name: Install deps
         run: npm ci
 
+      # Сборка Next.js (output: 'export' должен быть в next.config.js)
       - name: Build (Next.js)
-        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          npm run build
 
-      # Авторизация в GCP через service account JSON
+      # Аутентификация в Google Cloud по сервисному аккаунту
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
       - name: Install Firebase CLI
         run: npm i -g firebase-tools
 
-      # (однократно) — включить webframeworks, если не включали ранее
+      # Для проектов на webframeworks (Next.js) включаем эксперимент (безопасно запускать много раз)
       - name: Enable Firebase webframeworks
         run: firebase experiments:enable webframeworks
 
+      # ДЕПЛОЙ. Никакого --site, указываем сайт через --only "hosting:<siteId>"
       - name: Deploy to Firebase Hosting
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}   # Project ID, напр. "binage-lite"
+          FIREBASE_SITE: ${{ secrets.FIREBASE_SITE }}               # Site ID, напр. "binage-lite"
         run: |
-          if [ -n "${FIREBASE_SITE}" ]; then
-            firebase deploy --only hosting --project "${FIREBASE_PROJECT_ID}" --site "${FIREBASE_SITE}"
-          else
-            firebase deploy --only hosting --project "${FIREBASE_PROJECT_ID}"
-          fi
+          firebase deploy \
+            --only "hosting:${FIREBASE_SITE}" \
+            --project "${FIREBASE_PROJECT_ID}"
