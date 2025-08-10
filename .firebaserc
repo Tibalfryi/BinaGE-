@@ -1,5 +1,5 @@
 {
   "projects": {
-    "default": "binage-lite"
+    "default": "binage-lite"              // <-- замените на ваш реальный projectId, если он иной
   }
 }
