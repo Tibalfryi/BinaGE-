@@ -1,6 +1,10 @@
 {
   "hosting": {
     "site": "binage-lite",
-    "source": "."
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
 }
