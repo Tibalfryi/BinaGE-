@@ -26,14 +26,12 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # ВАЖНО: билд должен получить публичные ключи, иначе клиент не узнает куда ходить
       - name: Build (Next.js)
         run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-      # Аутентификация к GCP по JSON сервисного аккаунта
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -42,13 +40,8 @@ jobs:
       - name: Install Firebase CLI
         run: npm i -g firebase-tools
 
-      # Включаем веб‑фреймворки (Next.js на Firebase Hosting SSR)
       - name: Enable Firebase webframeworks
         run: firebase experiments:enable webframeworks
 
-      # Деплой Hosting (без --site и прочего, берём из firebase.json)
       - name: Deploy to Firebase Hosting
         run: firebase deploy --only hosting
-        env:
-          # не обязательно, но полезно, если у тебя есть несколько аккаунтов
-          FIREBASE_TOKEN: ""
