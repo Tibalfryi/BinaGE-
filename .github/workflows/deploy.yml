@@ -2,7 +2,7 @@ name: Deploy to Firebase Hosting
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -17,19 +17,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: npm
+          node-version: "20"
+          cache: "npm"
 
       - name: Install deps
         run: npm ci
 
+      # ВАЖНО: билд должен получить публичные ключи, иначе клиент не узнает куда ходить
       - name: Build (Next.js)
         run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-      # Аутентификация в GCP по ключу сервис-аккаунта (JSON целиком хранится в секрете GCP_SA_KEY_JSON)
+      # Аутентификация к GCP по JSON сервисного аккаунта
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -38,17 +42,13 @@ jobs:
       - name: Install Firebase CLI
         run: npm i -g firebase-tools
 
-      # Включаем webframeworks, чтобы Firebase корректно деплоил Next.js
+      # Включаем веб‑фреймворки (Next.js на Firebase Hosting SSR)
       - name: Enable Firebase webframeworks
         run: firebase experiments:enable webframeworks
 
-      # Сам деплой. ВАЖНО: без --site и без target — CLI возьмет site из firebase.json
+      # Деплой Hosting (без --site и прочего, берём из firebase.json)
       - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID"
+        run: firebase deploy --only hosting
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-
-      # Чистка после аутентификации (best practice)
-      - name: Post Authenticate to Google Cloud
-        if: always()
-        run: echo "Cleanup handled by action"
+          # не обязательно, но полезно, если у тебя есть несколько аккаунтов
+          FIREBASE_TOKEN: ""
