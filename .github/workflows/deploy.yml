@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: deploy
 
 on:
   push:
@@ -9,6 +9,13 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  # Просто удобные алиасы, чтобы не повторяться.
+  FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}   # например: binage-lite
+  FIREBASE_SITE_ID:    ${{ secrets.FIREBASE_SITE_ID }}      # например: binage-lite
+  NEXT_PUBLIC_SUPABASE_URL:       ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY:  ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,31 +24,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: 20
+          cache: 'npm'
 
       - name: Install deps
         run: npm ci
 
-      - name: Build (Next.js)
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      # <- КЛЮЧЕВОЕ -> создаём .env.production (и .env.local, вдруг используете) для Next.js из секретов
+      - name: Create .env files
+        run: |
+          cat > .env.production << 'EOF'
+          NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+          EOF
+          cp .env.production .env.local
+        shell: bash
 
+      # Аутентификация к Google Cloud через сервисный JSON (секрет: GCP_SA_KEY_JSON — полный JSON, который вы скачали)
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_JSON }}
 
+      # Firebase CLI
       - name: Install Firebase CLI
-        run: npm i -g firebase-tools
+        run: npm i -g firebase-tools@13
 
+      # Включаем webframeworks (Next.js на Firebase Hosting)
       - name: Enable Firebase webframeworks
         run: firebase experiments:enable webframeworks
 
+      # Деплой хостинга. Указываем проект и сайт явно, чтобы не было "No active project".
       - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting
+        env:
+          # webframeworks собирает Next сам, ему важны переменные окружения
+          NEXT_PUBLIC_SUPABASE_URL: ${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          firebase deploy \
+            --only hosting \
+            --project "${FIREBASE_PROJECT_ID}" \
+            --site "${FIREBASE_SITE_ID}"
