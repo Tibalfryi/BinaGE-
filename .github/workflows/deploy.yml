@@ -2,7 +2,7 @@ name: Deploy to Firebase Hosting
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -26,15 +26,10 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # Сборка Next.js (output: 'export' должен быть в next.config.js)
       - name: Build (Next.js)
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        run: |
-          npm run build
+        run: npm run build
 
-      # Аутентификация в Google Cloud по сервисному аккаунту
+      # Аутентификация в GCP по ключу сервис-аккаунта (JSON целиком хранится в секрете GCP_SA_KEY_JSON)
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -43,16 +38,17 @@ jobs:
       - name: Install Firebase CLI
         run: npm i -g firebase-tools
 
-      # Для проектов на webframeworks (Next.js) включаем эксперимент (безопасно запускать много раз)
+      # Включаем webframeworks, чтобы Firebase корректно деплоил Next.js
       - name: Enable Firebase webframeworks
         run: firebase experiments:enable webframeworks
 
-      # ДЕПЛОЙ. Никакого --site, указываем сайт через --only "hosting:<siteId>"
+      # Сам деплой. ВАЖНО: без --site и без target — CLI возьмет site из firebase.json
       - name: Deploy to Firebase Hosting
+        run: firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID"
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}   # Project ID, напр. "binage-lite"
-          FIREBASE_SITE: ${{ secrets.FIREBASE_SITE }}               # Site ID, напр. "binage-lite"
-        run: |
-          firebase deploy \
-            --only "hosting:${FIREBASE_SITE}" \
-            --project "${FIREBASE_PROJECT_ID}"
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+
+      # Чистка после аутентификации (best practice)
+      - name: Post Authenticate to Google Cloud
+        if: always()
+        run: echo "Cleanup handled by action"
