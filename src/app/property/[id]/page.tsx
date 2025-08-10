@@ -1,63 +1,86 @@
-// src/app/property/[id]/page.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
-// Статический экспорт (Next 15 + output: 'export')
-export const dynamic = 'error';
-export const dynamicParams = false;
-export const revalidate = 600;
+// Делает страницу полностью динамической (никаких пререндеров с фетчем на билде)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-// Инициализация Supabase (публичные env из секретов)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+type Property = {
+  id: number;
+  title?: string;
+  price?: number;
+  bedrooms?: number;
+  address?: string;
+  description?: string;
+  images?: string[] | null;
+};
 
-// Сгенерировать список маршрутов для /property/[id]
-export async function generateStaticParams() {
-  // !!! Проверь имя таблицы. Здесь стоит 'BinaGE'.
-  const { data, error } = await supabase.from('BinaGE').select('id').limit(10000);
-  if (error || !data) return [];
-  return data
-    .filter((r) => r?.id !== null && r?.id !== undefined)
-    .map((r) => ({ id: String(r.id) }));
-}
+// Берём **публичные** переменные (они должны прийти в бандл на этапе build)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined;
 
-// Тип params в Next 15 — это Promise
-type PageParams = Promise<{ id: string }>;
+const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
 
-export default async function PropertyPage({
-  params,
-}: {
-  params: PageParams;
-}) {
-  const { id } = await params;
+export default function PropertyPage() {
+  const params = useParams<{ id: string }>();
+  const [data, setData] = useState<Property | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorText, setErrorText] = useState<string | null>(null);
 
-  const numericId = Number(id);
-  if (Number.isNaN(numericId)) {
-    return <div className="p-4">Некорректный ID</div>;
-  }
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        setErrorText(null);
 
-  // !!! Проверь имя таблицы. Здесь стоит 'BinaGE'.
-  const { data, error } = await supabase
-    .from('BinaGE')
-    .select('*')
-    .eq('id', numericId)
-    .single();
+        if (!supabase) {
+          throw new Error(
+            'SUPABASE env is missing. Проверь NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+          );
+        }
 
-  if (error || !data) {
-    return <div className="p-4">Объявление не найдено</div>;
-  }
+        const numericId = Number(params.id);
+        if (Number.isNaN(numericId)) {
+          throw new Error('Некорректный ID объявления');
+        }
+
+        // ⚠️ ЗАМЕНИ "BinaGE" на реальное имя таблицы
+        const { data, error } = await supabase
+          .from('BinaGE')
+          .select('*')
+          .eq('id', numericId)
+          .single();
+
+        if (error) throw error;
+        setData(data as Property);
+      } catch (e: any) {
+        setErrorText(e?.message ?? 'Ошибка загрузки');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+  }, [params.id]);
+
+  if (loading) return <div className="p-4">Загрузка…</div>;
+  if (errorText) return <div className="p-4 text-red-600">Ошибка: {errorText}</div>;
+  if (!data) return <div className="p-4">Объявление не найдено</div>;
 
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-semibold">
-        {data.title ?? `Объект #${data.id}`}
-      </h1>
+      <h1 className="text-2xl font-semibold">{data.title ?? `Объект #${data.id}`}</h1>
       <div className="text-sm opacity-80">{data.address}</div>
       <div className="text-lg">Цена: {data.price ?? '—'}</div>
       <div>Спальни: {data.bedrooms ?? '—'}</div>
 
-      <pre className="text-xs bg-muted p-3 rounded-lg overflow-auto">
+      <pre className="text-xs bg-gray-100 p-3 rounded-lg overflow-auto">
         {JSON.stringify(data, null, 2)}
       </pre>
     </div>
