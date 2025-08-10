@@ -1,18 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Никакого output: 'export'!
-  reactStrictMode: true,
-
-  // Если используешь next/image с внешними картинками — раскомментируй и настрой
-  // images: {
-  //   remotePatterns: [
-  //     { protocol: 'https', hostname: '**' }
-  //   ]
-  // },
-
-  experimental: {
-    // оставим пусто/по умолчанию
+  // Проталкиваем публичные переменные на клиент
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
+  // На всякий случай выключаем static export — у нас SSR на Firebase
+  output: undefined,
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig;
